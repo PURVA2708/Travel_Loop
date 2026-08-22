@@ -3,6 +3,19 @@ import { verifyAccessToken, TokenPayload } from '../utils/jwt';
 
 export interface AuthenticatedRequest extends Request {
   user?: TokenPayload;
+  userId?: string;
+  userRole?: 'user' | 'admin' | string;
+}
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      user?: TokenPayload;
+      userId?: string;
+      userRole?: 'user' | 'admin' | string;
+    }
+  }
 }
 
 export const authMiddleware = (
@@ -23,6 +36,8 @@ export const authMiddleware = (
     const token = authHeader.split(' ')[1];
     const decoded = verifyAccessToken(token);
     req.user = decoded;
+    req.userId = decoded.userId || (decoded as any).sub;
+    req.userRole = decoded.role?.toLowerCase();
     next();
   } catch (error) {
     res.status(401).json({
@@ -31,6 +46,8 @@ export const authMiddleware = (
     });
   }
 };
+
+export const requireAuth = authMiddleware;
 
 export const optionalAuthMiddleware = (
   req: AuthenticatedRequest,
@@ -43,6 +60,8 @@ export const optionalAuthMiddleware = (
       const token = authHeader.split(' ')[1];
       const decoded = verifyAccessToken(token);
       req.user = decoded;
+      req.userId = decoded.userId || (decoded as any).sub;
+      req.userRole = decoded.role?.toLowerCase();
     }
     next();
   } catch {
@@ -56,7 +75,8 @@ export const requireAdmin = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.user || req.user.role !== 'ADMIN') {
+  const role = req.user?.role?.toLowerCase() || req.userRole?.toLowerCase();
+  if (role !== 'admin') {
     res.status(403).json({
       success: false,
       message: 'Forbidden. Admin privileges required.',

@@ -8,8 +8,8 @@ import { useAuthStore } from '../../store/authStore';
 import { api } from '../../lib/api';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@globetrotter.app');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,12 +26,13 @@ export const LoginPage: React.FC = () => {
 
     try {
       const res = await api.post('/auth/login', { email, password });
-      if (res.data.success && res.data.data) {
-        setAuth(res.data.data);
+      const authData = res.data.data || res.data;
+      if (authData) {
+        setAuth(authData);
         navigate(from, { replace: true });
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -39,109 +40,115 @@ export const LoginPage: React.FC = () => {
 
   const handleDemoLogin = (role: 'user' | 'admin') => {
     if (role === 'user') {
-      setEmail('alex@globetrotter.com');
-      setPassword('Password123!');
+      setEmail('demo@globetrotter.app');
+      setPassword('password123');
     } else {
       setEmail('admin@globetrotter.com');
-      setPassword('Password123!');
+      setPassword('password123');
     }
   };
 
   return (
-    <Card className="shadow-modal">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-extrabold text-ink tracking-tight">Welcome back</h2>
-        <p className="text-xs text-ink-muted mt-1">
-          Sign in to access your planned trips and saved wishlist
-        </p>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
+      <Card className="w-full max-w-[440px] shadow-modal">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-extrabold text-ink tracking-tight font-display">
+            Globe<span className="text-brand">Trotter</span>
+          </h2>
+          <p className="text-xs text-ink-muted mt-1">
+            Sign in to access your planned trips, multi-city itineraries, and budget tracking
+          </p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="you@example.com"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          leftIcon={<Mail className="w-4 h-4" />}
-        />
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
 
-        <div>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            leftIcon={<Lock className="w-4 h-4" />}
-            rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="focus:outline-none hover:text-ink"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            }
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail className="w-4 h-4" />}
           />
-          <div className="flex justify-end mt-1.5">
-            <Link
-              to="/forgot-password"
-              className="text-xs font-medium text-ink-muted hover:text-brand-dark transition-colors"
+
+          <div>
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="focus:outline-none hover:text-ink"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
+            <div className="flex justify-end mt-1.5">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium text-ink-muted hover:text-brand-dark transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full mt-2"
+            isLoading={isLoading}
+          >
+            Sign In
+          </Button>
+        </form>
+
+        {/* Demo Credentials Helper */}
+        <div className="mt-6 pt-4 border-t border-ink-border/20">
+          <p className="text-[11px] font-semibold text-ink-muted text-center mb-2">
+            ⚡ Quick Demo Logins:
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('user')}
+              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
             >
-              Forgot password?
-            </Link>
+              Demo Traveler
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('admin')}
+              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
+            >
+              Admin Sarah
+            </button>
           </div>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full mt-2"
-          isLoading={isLoading}
-        >
-          Sign In
-        </Button>
-      </form>
-
-      {/* Demo Credentials Helper */}
-      <div className="mt-6 pt-4 border-t border-ink-border/20">
-        <p className="text-[11px] font-semibold text-ink-muted text-center mb-2">
-          ⚡ Quick Hackathon Demo Logins:
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('user')}
-            className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
-          >
-            Demo User (Alex)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('admin')}
-            className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
-          >
-            Admin (Sarah)
-          </button>
+        <div className="mt-6 text-center text-xs text-ink-muted">
+          Don&apos;t have an account?{' '}
+          <Link to="/signup" className="font-bold text-ink hover:text-brand-dark transition-colors">
+            Sign up now
+          </Link>
         </div>
-      </div>
-
-      <div className="mt-6 text-center text-xs text-ink-muted">
-        Don&apos;t have an account?{' '}
-        <Link to="/signup" className="font-bold text-ink hover:text-brand-dark transition-colors">
-          Sign up now
-        </Link>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
+
+export default LoginPage;

@@ -3,13 +3,20 @@ import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/error.middleware';
 import { ActivityQueryInput } from './activities.schema';
 
+export type ActivityListQuery = {
+  cityId?: string;
+  category?: ActivityCategory;
+  maxCost?: number;
+  maxDuration?: number;
+};
+
 export class ActivitiesService {
-  static async getActivities(query: ActivityQueryInput) {
-    const { search, cityId, category, maxCost, maxDuration, sort, page = 1, limit = 20 } = query;
+  static async getActivities(query: ActivityQueryInput | any) {
+    const { search, cityId, category, maxCost, maxDuration, sort, page = 1, limit = 50 } = query;
 
     const where: Prisma.ActivityWhereInput = {};
 
-    if (search && search.trim() !== '') {
+    if (search && typeof search === 'string' && search.trim() !== '') {
       const q = search.trim();
       where.OR = [
         { name: { contains: q, mode: 'insensitive' } },
@@ -24,21 +31,18 @@ export class ActivitiesService {
     }
 
     if (category && category !== 'all') {
-      const catEnum = category.toUpperCase() as ActivityCategory;
-      if (Object.values(ActivityCategory).includes(catEnum)) {
-        where.category = catEnum;
-      }
+      where.category = category.toLowerCase() as ActivityCategory;
     }
 
     if (maxCost !== undefined) {
-      where.cost = { lte: maxCost };
+      where.cost = { lte: Number(maxCost) };
     }
 
     if (maxDuration !== undefined) {
-      where.durationMinutes = { lte: maxDuration };
+      where.durationMinutes = { lte: Number(maxDuration) };
     }
 
-    let orderBy: Prisma.ActivityOrderByWithRelationInput = { rating: 'desc' };
+    let orderBy: Prisma.ActivityOrderByWithRelationInput = { name: 'asc' };
     if (sort === 'cost_asc') {
       orderBy = { cost: 'asc' };
     } else if (sort === 'cost_desc') {
@@ -47,7 +51,7 @@ export class ActivitiesService {
       orderBy = { durationMinutes: 'asc' };
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const [total, activities] = await Promise.all([
       prisma.activity.count({ where }),
@@ -55,7 +59,7 @@ export class ActivitiesService {
         where,
         orderBy,
         skip,
-        take: limit,
+        take: Number(limit),
         include: {
           city: {
             select: {
@@ -78,7 +82,6 @@ export class ActivitiesService {
       cost: Number(a.cost),
       durationMinutes: a.durationMinutes,
       imageUrl: a.imageUrl,
-      rating: Number(a.rating),
       city: a.city,
     }));
 
@@ -86,9 +89,9 @@ export class ActivitiesService {
       activities: formatted,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit)),
       },
     };
   }
@@ -114,13 +117,21 @@ export class ActivitiesService {
       cost: Number(activity.cost),
       durationMinutes: activity.durationMinutes,
       imageUrl: activity.imageUrl,
-      rating: Number(activity.rating),
-      city: {
-        ...activity.city,
-        costIndex: Number(activity.city.costIndex),
-        lat: activity.city.lat ? Number(activity.city.lat) : null,
-        lng: activity.city.lng ? Number(activity.city.lng) : null,
-      },
+      city: activity.city
+        ? {
+            ...activity.city,
+            costIndex: Number(activity.city.costIndex),
+            lat: activity.city.lat ? Number(activity.city.lat) : null,
+            lng: activity.city.lng ? Number(activity.city.lng) : null,
+          }
+        : null,
     };
   }
 }
+
+export const listActivities = async (query: ActivityListQuery) => {
+  const res = await ActivitiesService.getActivities({ ...query, limit: 100 });
+  return res.activities;
+};
+
+export const getActivityById = ActivitiesService.getActivityById;

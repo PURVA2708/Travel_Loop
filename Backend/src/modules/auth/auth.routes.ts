@@ -4,12 +4,12 @@ import { validateRequest } from '../../middleware/validate.middleware';
 import { signupSchema, loginSchema, refreshTokenSchema } from './auth.schema';
 import { authMiddleware } from '../../middleware/auth.middleware';
 
-const router = Router();
+export const authRouter = Router();
 
-router.post('/signup', validateRequest(signupSchema), AuthController.signup);
-router.post('/login', validateRequest(loginSchema), AuthController.login);
-router.post('/logout', AuthController.logout);
-router.post('/refresh-token', validateRequest(refreshTokenSchema), AuthController.refreshToken);
-router.get('/me', authMiddleware, AuthController.getMe);
+authRouter.post('/signup', validateRequest(signupSchema), AuthController.signup);
+authRouter.post('/login', validateRequest(loginSchema), AuthController.login);
+authRouter.post('/logout', AuthController.logout);
+authRouter.post('/refresh-token', validateRequest(refreshTokenSchema), AuthController.refreshToken);
+authRouter.get('/me', authMiddleware, AuthController.getMe);
 
-export default router;
+export default authRouter;

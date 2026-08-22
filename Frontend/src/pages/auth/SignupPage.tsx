@@ -35,89 +35,96 @@ export const SignupPage: React.FC = () => {
         email,
         password,
       });
-      if (res.data.success && res.data.data) {
-        setAuth(res.data.data);
+      const authData = res.data.data || res.data;
+      if (authData) {
+        setAuth(authData);
         navigate('/dashboard', { replace: true });
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="shadow-modal">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-extrabold text-ink tracking-tight">Create an account</h2>
-        <p className="text-xs text-ink-muted mt-1">
-          Join GlobeTrotter to discover destinations & create itineraries
-        </p>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
+      <Card className="w-full max-w-[440px] shadow-modal">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-extrabold text-ink tracking-tight font-display">
+            Create an account
+          </h2>
+          <p className="text-xs text-ink-muted mt-1">
+            Join GlobeTrotter to discover destinations & create smart itineraries
+          </p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Full Name"
-          type="text"
-          placeholder="Maya Lin"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          leftIcon={<User className="w-4 h-4" />}
-        />
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
 
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="maya@example.com"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          leftIcon={<Mail className="w-4 h-4" />}
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Full Name"
+            type="text"
+            placeholder="Maya Lin"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            leftIcon={<User className="w-4 h-4" />}
+          />
 
-        <Input
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          placeholder="At least 6 characters"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          leftIcon={<Lock className="w-4 h-4" />}
-          rightIcon={
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="focus:outline-none hover:text-ink"
-            >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          }
-        />
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="maya@example.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail className="w-4 h-4" />}
+          />
 
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full mt-2"
-          isLoading={isLoading}
-        >
-          Create Free Account
-        </Button>
-      </form>
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="At least 6 characters"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftIcon={<Lock className="w-4 h-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="focus:outline-none hover:text-ink"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            }
+          />
 
-      <div className="mt-6 text-center text-xs text-ink-muted">
-        Already have an account?{' '}
-        <Link to="/login" className="font-bold text-ink hover:text-brand-dark transition-colors">
-          Sign in
-        </Link>
-      </div>
-    </Card>
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full mt-2"
+            isLoading={isLoading}
+          >
+            Create Free Account
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center text-xs text-ink-muted">
+          Already have an account?{' '}
+          <Link to="/login" className="font-bold text-ink hover:text-brand-dark transition-colors">
+            Sign in
+          </Link>
+        </div>
+      </Card>
+    </div>
   );
 };
+
+export default SignupPage;

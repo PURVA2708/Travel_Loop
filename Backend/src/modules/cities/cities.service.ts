@@ -3,19 +3,25 @@ import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/error.middleware';
 import { CityQueryInput } from './cities.schema';
 
+export type CityListQuery = {
+  search?: string;
+  country?: string;
+  region?: string;
+  sort?: 'popularity' | 'name' | 'cost' | 'cost_asc' | 'cost_desc';
+};
+
 export class CitiesService {
-  static async getCities(query: CityQueryInput, userId?: string) {
-    const { search, region, country, sort, minCost, maxCost, page = 1, limit = 20 } = query;
+  static async getCities(query: CityQueryInput | any, userId?: string) {
+    const { search, region, country, sort, minCost, maxCost, page = 1, limit = 50 } = query;
 
     const where: Prisma.CityWhereInput = {};
 
-    if (search && search.trim() !== '') {
+    if (search && typeof search === 'string' && search.trim() !== '') {
       const q = search.trim();
       where.OR = [
         { name: { contains: q, mode: 'insensitive' } },
         { country: { contains: q, mode: 'insensitive' } },
         { region: { contains: q, mode: 'insensitive' } },
-        { description: { contains: q, mode: 'insensitive' } },
       ];
     }
 
@@ -29,12 +35,12 @@ export class CitiesService {
 
     if (minCost !== undefined || maxCost !== undefined) {
       where.costIndex = {};
-      if (minCost !== undefined) where.costIndex.gte = minCost;
-      if (maxCost !== undefined) where.costIndex.lte = maxCost;
+      if (minCost !== undefined) where.costIndex.gte = Number(minCost);
+      if (maxCost !== undefined) where.costIndex.lte = Number(maxCost);
     }
 
     let orderBy: Prisma.CityOrderByWithRelationInput = { popularityScore: 'desc' };
-    if (sort === 'cost_asc') {
+    if (sort === 'cost_asc' || sort === 'cost') {
       orderBy = { costIndex: 'asc' };
     } else if (sort === 'cost_desc') {
       orderBy = { costIndex: 'desc' };
@@ -42,7 +48,7 @@ export class CitiesService {
       orderBy = { name: 'asc' };
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const [total, cities] = await Promise.all([
       prisma.city.count({ where }),
@@ -50,12 +56,12 @@ export class CitiesService {
         where,
         orderBy,
         skip,
-        take: limit,
+        take: Number(limit),
         include: {
           _count: {
             select: { activities: true },
           },
-          savedByUsers: userId ? { where: { userId } } : false,
+          savedBy: userId ? { where: { userId } } : false,
         },
       }),
     ]);
@@ -65,23 +71,22 @@ export class CitiesService {
       name: c.name,
       country: c.country,
       region: c.region,
-      description: c.description,
       costIndex: Number(c.costIndex),
       popularityScore: c.popularityScore,
       imageUrl: c.imageUrl,
       lat: c.lat ? Number(c.lat) : null,
       lng: c.lng ? Number(c.lng) : null,
       activityCount: c._count.activities,
-      isSaved: userId ? Array.isArray(c.savedByUsers) && c.savedByUsers.length > 0 : false,
+      isSaved: userId ? Array.isArray((c as any).savedBy) && (c as any).savedBy.length > 0 : false,
     }));
 
     return {
       cities: formattedCities,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit)),
       },
     };
   }
@@ -90,13 +95,11 @@ export class CitiesService {
     const city = await prisma.city.findUnique({
       where: { id: cityId },
       include: {
-        activities: {
-          orderBy: { rating: 'desc' },
-        },
+        activities: true,
         _count: {
           select: { activities: true },
         },
-        savedByUsers: userId ? { where: { userId } } : false,
+        savedBy: userId ? { where: { userId } } : false,
       },
     });
 
@@ -109,14 +112,13 @@ export class CitiesService {
       name: city.name,
       country: city.country,
       region: city.region,
-      description: city.description,
       costIndex: Number(city.costIndex),
       popularityScore: city.popularityScore,
       imageUrl: city.imageUrl,
       lat: city.lat ? Number(city.lat) : null,
       lng: city.lng ? Number(city.lng) : null,
       activityCount: city._count.activities,
-      isSaved: userId ? Array.isArray(city.savedByUsers) && city.savedByUsers.length > 0 : false,
+      isSaved: userId ? Array.isArray((city as any).savedBy) && (city as any).savedBy.length > 0 : false,
       activities: city.activities.map((a) => ({
         id: a.id,
         cityId: a.cityId,
@@ -126,7 +128,6 @@ export class CitiesService {
         cost: Number(a.cost),
         durationMinutes: a.durationMinutes,
         imageUrl: a.imageUrl,
-        rating: Number(a.rating),
       })),
     };
   }
@@ -146,20 +147,20 @@ export class CitiesService {
     const where: Prisma.ActivityWhereInput = { cityId };
 
     if (filters?.category && filters.category !== 'all') {
-      where.category = filters.category.toUpperCase() as any;
+      where.category = filters.category.toLowerCase() as any;
     }
 
     if (filters?.maxCost !== undefined) {
-      where.cost = { lte: filters.maxCost };
+      where.cost = { lte: Number(filters.maxCost) };
     }
 
     if (filters?.maxDuration !== undefined) {
-      where.durationMinutes = { lte: filters.maxDuration };
+      where.durationMinutes = { lte: Number(filters.maxDuration) };
     }
 
     const activities = await prisma.activity.findMany({
       where,
-      orderBy: { rating: 'desc' },
+      orderBy: { name: 'asc' },
     });
 
     return activities.map((a) => ({
@@ -171,7 +172,13 @@ export class CitiesService {
       cost: Number(a.cost),
       durationMinutes: a.durationMinutes,
       imageUrl: a.imageUrl,
-      rating: Number(a.rating),
     }));
   }
 }
+
+export const listCities = async (query: CityListQuery) => {
+  const res = await CitiesService.getCities({ ...query, limit: 50 });
+  return res.cities;
+};
+
+export const getCityById = CitiesService.getCityById;

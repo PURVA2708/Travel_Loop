@@ -4,6 +4,11 @@ import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
 import citiesRoutes from './modules/cities/cities.routes';
 import activitiesRoutes from './modules/activities/activities.routes';
+import { tripsRouter } from './modules/trips/trips.routes';
+import budgetRoutes from './modules/budget/routes';
+import calendarRoutes from './modules/calendar/routes';
+import { publicShareRouter, tripShareRouter } from './modules/share/routes';
+import adminRoutes from './modules/admin/routes';
 import { errorHandler } from './middleware/error.middleware';
 
 export const createApp = (): Express => {
@@ -31,6 +36,10 @@ export const createApp = (): Express => {
   });
 
   // Health check
+  app.get('/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({
       status: 'ok',
@@ -40,11 +49,20 @@ export const createApp = (): Express => {
     });
   });
 
-  // Mount API modules
-  app.use('/api/v1/auth', authRoutes);
-  app.use('/api/v1/users', usersRoutes);
-  app.use('/api/v1/cities', citiesRoutes);
-  app.use('/api/v1/activities', activitiesRoutes);
+  // Mount API v1 modules
+  const v1 = express.Router();
+  v1.use('/auth', authRoutes);
+  v1.use('/users', usersRoutes);
+  v1.use('/cities', citiesRoutes);
+  v1.use('/activities', activitiesRoutes);
+  v1.use('/trips', tripsRouter);
+  v1.use('/trips/:id/budget', budgetRoutes);
+  v1.use('/trips/:id/calendar', calendarRoutes);
+  v1.use('/trips/:id/share', tripShareRouter);
+  v1.use('/share', publicShareRouter);
+  v1.use('/admin', adminRoutes);
+
+  app.use('/api/v1', v1);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
@@ -59,3 +77,6 @@ export const createApp = (): Express => {
 
   return app;
 };
+
+export const app = createApp();
+export default app;

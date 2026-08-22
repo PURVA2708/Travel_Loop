@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { prisma } from '../../lib/prisma';
 import { hashPassword, comparePassword } from '../../utils/password';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt';
@@ -146,3 +147,7 @@ export class AuthService {
     return user;
   }
 }
+
+export const signup = AuthService.signup;
+export const login = AuthService.login;
+export const getMe = AuthService.getMe;

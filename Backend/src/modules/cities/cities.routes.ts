@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { CitiesController } from './cities.controller';
+import { CitiesController, listCitiesHandler, getCityHandler } from './cities.controller';
 import { optionalAuthMiddleware } from '../../middleware/auth.middleware';
 
-const router = Router();
+export const citiesRouter = Router();
 
 // Cities routes are public, but use optional auth so we know if user has saved them
-router.use(optionalAuthMiddleware);
+citiesRouter.use(optionalAuthMiddleware);
 
-router.get('/', CitiesController.getCities);
-router.get('/:id', CitiesController.getCityById);
-router.get('/:id/activities', CitiesController.getCityActivities);
+citiesRouter.get('/', CitiesController.getCities);
+citiesRouter.get('/raw', listCitiesHandler);
+citiesRouter.get('/:id', CitiesController.getCityById);
+citiesRouter.get('/:id/activities', CitiesController.getCityActivities);
 
-export default router;
+export default citiesRouter;

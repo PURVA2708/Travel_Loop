@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import { ActivitiesController } from './activities.controller';
+import { ActivitiesController, listActivitiesHandler, getActivityHandler } from './activities.controller';
+import { optionalAuthMiddleware } from '../../middleware/auth.middleware';
 
-const router = Router();
+export const activitiesRouter = Router();
 
-router.get('/', ActivitiesController.getActivities);
-router.get('/:id', ActivitiesController.getActivityById);
+activitiesRouter.get('/', optionalAuthMiddleware, ActivitiesController.getActivities);
+activitiesRouter.get('/raw', optionalAuthMiddleware, listActivitiesHandler);
+activitiesRouter.get('/:id', optionalAuthMiddleware, ActivitiesController.getActivityById);
 
-export default router;
+export default activitiesRouter;

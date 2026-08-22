@@ -31,7 +31,6 @@ export class AuthController {
 
   static async logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // In stateless JWT, client deletes token; endpoint confirms success
       res.status(200).json({
         success: true,
         message: 'Logged out successfully',
@@ -57,11 +56,12 @@ export class AuthController {
 
   static async getMe(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user) {
+      const userId = req.user?.userId || req.userId;
+      if (!userId) {
         res.status(401).json({ success: false, message: 'Unauthorized' });
         return;
       }
-      const user = await AuthService.getMe(req.user.userId);
+      const user = await AuthService.getMe(userId);
       res.status(200).json({
         success: true,
         data: user,
@@ -71,3 +71,7 @@ export class AuthController {
     }
   }
 }
+
+export const signupHandler = AuthController.signup;
+export const loginHandler = AuthController.login;
+export const meHandler = AuthController.getMe;
