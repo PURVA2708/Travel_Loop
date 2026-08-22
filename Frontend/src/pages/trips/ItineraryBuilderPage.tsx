@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
+import { Wallet, CalendarDays, Map, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import {
   DndContext,
   type DragEndEvent,
@@ -89,12 +90,24 @@ export function ItineraryBuilderPage() {
             {formatMoney(tripTotal)} planned so far
           </p>
         </div>
-        <Button onClick={() => setCityPickerOpen(true)}>+ Add Stop</Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to={`/budget/${tripId}`}>
+            <Button variant="outline">
+              <Wallet className="h-4 w-4" /> Budget
+            </Button>
+          </Link>
+          <Link to={`/calendar/${tripId}`}>
+            <Button variant="outline">
+              <CalendarDays className="h-4 w-4" /> Calendar
+            </Button>
+          </Link>
+          <Button onClick={() => setCityPickerOpen(true)}>+ Add Stop</Button>
+        </div>
       </div>
 
       {sortedStops.length === 0 ? (
         <EmptyState
-          icon="🗺️"
+          icon={<Map />}
           title="No stops yet"
           description="Add your first city to start building this trip's itinerary."
           action={<Button onClick={() => setCityPickerOpen(true)}>+ Add Stop</Button>}
@@ -178,7 +191,7 @@ function StopListItem({
             className="cursor-grab touch-none px-1 text-ink/30 active:cursor-grabbing"
             aria-label="Drag to reorder stop"
           >
-            ⠿
+            <GripVertical className="h-4 w-4" />
           </button>
           <button onClick={onSelect} className="flex-1 text-left">
             <p className="text-sm font-bold text-ink">
@@ -197,7 +210,7 @@ function StopListItem({
               className="text-ink/40 hover:text-ink disabled:opacity-20"
               aria-label="Move stop up"
             >
-              ▲
+              <ChevronUp className="h-4 w-4" />
             </button>
             <button
               onClick={() => onMove(1)}
@@ -205,7 +218,7 @@ function StopListItem({
               className="text-ink/40 hover:text-ink disabled:opacity-20"
               aria-label="Move stop down"
             >
-              ▼
+              <ChevronDown className="h-4 w-4" />
             </button>
           </div>
         </li>

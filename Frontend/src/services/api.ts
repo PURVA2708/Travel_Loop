@@ -9,8 +9,18 @@ import {
   TripExpense,
   ExpenseCategory,
 } from '../types/index.ts';
+import { useAuthStore } from '../store/authStore.ts';
 
 const API_BASE = '/api/v1';
+
+// Budget/Calendar/trip-scoped Share all require a logged-in user on the backend —
+// plain fetch() sends no Authorization header by default, so every one of these
+// calls needs it attached explicitly (unlike the shared axios `api` client elsewhere,
+// which does this automatically via an interceptor).
+function authHeaders(): Record<string, string> {
+  const token = useAuthStore.getState().accessToken;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 // Initial Mock Trips and Data for offline/instant testing
 export const MOCK_TRIP_ID = 'trip-goa-kerala-2026';
@@ -73,7 +83,7 @@ export const apiClient = {
   // -------------------------------------------------------------
   async getBudget(tripId: string): Promise<BudgetData> {
     try {
-      const res = await fetch(`${API_BASE}/trips/${tripId}/budget`);
+      const res = await fetch(`${API_BASE}/trips/${tripId}/budget`, { headers: authHeaders() });
       if (res.ok) {
         const json = await res.json();
         if (json.success) return json.data;
@@ -124,7 +134,7 @@ export const apiClient = {
     try {
       const res = await fetch(`${API_BASE}/trips/${tripId}/budget/expenses`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(data),
       });
       if (res.ok) {
@@ -151,6 +161,7 @@ export const apiClient = {
     try {
       const res = await fetch(`${API_BASE}/trips/${MOCK_TRIP_ID}/budget/expenses/${expenseId}`, {
         method: 'DELETE',
+        headers: authHeaders(),
       });
       if (res.ok) return true;
     } catch {
@@ -165,7 +176,7 @@ export const apiClient = {
   // -------------------------------------------------------------
   async getCalendar(tripId: string): Promise<CalendarData> {
     try {
-      const res = await fetch(`${API_BASE}/trips/${tripId}/calendar`);
+      const res = await fetch(`${API_BASE}/trips/${tripId}/calendar`, { headers: authHeaders() });
       if (res.ok) {
         const json = await res.json();
         if (json.success) return json.data;
@@ -498,7 +509,7 @@ export const apiClient = {
 
   async createShareLink(tripId: string): Promise<{ publicSlug: string }> {
     try {
-      const res = await fetch(`${API_BASE}/trips/${tripId}/share`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/trips/${tripId}/share`, { method: 'POST', headers: authHeaders() });
       if (res.ok) {
         const json = await res.json();
         if (json.success) return { publicSlug: json.data.publicSlug };

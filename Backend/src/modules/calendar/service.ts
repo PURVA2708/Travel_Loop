@@ -54,7 +54,11 @@ export class CalendarService {
       }
     > = {};
 
-    // Initialize all dates in trip duration
+    // Initialize all dates in trip duration.
+    // Uses UTC-based stepping (setUTCDate), not local-time setDate — dates are stored
+    // as UTC midnight, so local-time arithmetic would shift the day boundary on any
+    // server running in a timezone behind UTC (harmless here since this runs in IST,
+    // which is ahead of UTC, but silently wrong elsewhere).
     const curr = new Date(startDate);
     let dayCount = 1;
     while (curr <= endDate) {
@@ -64,7 +68,7 @@ export class CalendarService {
         dayNumber: dayCount++,
         activities: [],
       };
-      curr.setDate(curr.getDate() + 1);
+      curr.setUTCDate(curr.getUTCDate() + 1);
     }
 
     // Populate stops & activities into days
@@ -84,7 +88,7 @@ export class CalendarService {
             imageUrl: stop.city.imageUrl,
           };
         }
-        step.setDate(step.getDate() + 1);
+        step.setUTCDate(step.getUTCDate() + 1);
       }
 
       // Add activities

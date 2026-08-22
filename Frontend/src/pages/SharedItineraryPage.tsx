@@ -79,7 +79,7 @@ export const SharedItineraryPage: React.FC<{ slug?: string; onNavigate?: (tab: s
       {/* TripAdvisor-Style Split Hero Banner */}
       <div className="bg-surface-white border-b border-surface-subtle">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
-          {/* Left: Solid #00EB5B Color Block with High-Contrast Typography */}
+          {/* Left: Solid #A9784F Color Block with High-Contrast Typography */}
           <div className="lg:col-span-6 bg-brand p-8 sm:p-12 flex flex-col justify-between text-ink">
             <div>
               <div className="flex items-center gap-2 mb-4">

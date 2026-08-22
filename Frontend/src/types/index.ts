@@ -14,7 +14,7 @@ export type ActivityCategory =
 
 export type ExpenseCategory = 'transport' | 'stay' | 'activities' | 'meals' | 'misc';
 
-export type TripStatus = 'draft' | 'planned' | 'completed' | 'DRAFT' | 'PLANNED' | 'COMPLETED';
+export type TripStatus = 'draft' | 'planned' | 'completed';
 
 export interface User {
   id: string;

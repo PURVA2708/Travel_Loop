@@ -8,10 +8,32 @@ import {
   LayoutList,
   CalendarDays,
   DollarSign,
+  Plus,
+  CheckCircle2,
 } from 'lucide-react';
 import { apiClient, MOCK_TRIP_ID } from '../services/api.ts';
-import { CalendarData } from '../types/index.ts';
+import { CalendarData, ExpenseCategory } from '../types/index.ts';
 import { CategoryBadge } from '../components/common/Badge.tsx';
+
+const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
+  { value: 'transport', label: 'Transport & Flights' },
+  { value: 'stay', label: 'Accommodation & Stay' },
+  { value: 'activities', label: 'Activities & Tours' },
+  { value: 'meals', label: 'Meals & Dining' },
+  { value: 'misc', label: 'Miscellaneous' },
+];
+
+function formatGridMonthLabel(days: { date: string }[]): string {
+  if (days.length === 0) return '';
+  const first = new Date(days[0].date);
+  const last = new Date(days[days.length - 1].date);
+  const firstLabel = first.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  if (first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()) {
+    return firstLabel;
+  }
+  const lastLabel = last.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  return `${first.toLocaleDateString('en-IN', { month: 'short' })} – ${lastLabel}`;
+}
 
 export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
   tripId = MOCK_TRIP_ID,
@@ -21,6 +43,12 @@ export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [logCategory, setLogCategory] = useState<ExpenseCategory>('activities');
+  const [logAmount, setLogAmount] = useState('');
+  const [logNote, setLogNote] = useState('');
+  const [logSubmitting, setLogSubmitting] = useState(false);
+  const [logSuccess, setLogSuccess] = useState<string | null>(null);
+  const [logError, setLogError] = useState<string | null>(null);
 
   const fetchCalendar = async () => {
     setLoading(true);
@@ -40,6 +68,38 @@ export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
   useEffect(() => {
     fetchCalendar();
   }, [tripId]);
+
+  useEffect(() => {
+    setLogSuccess(null);
+    setLogError(null);
+  }, [selectedDate]);
+
+  async function handleLogExpense(e: React.FormEvent, dayLabel: string) {
+    e.preventDefault();
+    const amount = Number(logAmount);
+    if (!amount || amount <= 0) {
+      setLogError('Enter a valid amount');
+      return;
+    }
+    setLogSubmitting(true);
+    setLogError(null);
+    setLogSuccess(null);
+    try {
+      await apiClient.addExpense(tripId, {
+        category: logCategory,
+        amount,
+        note: logNote ? `[${dayLabel}] ${logNote}` : `[${dayLabel}] Logged from Calendar`,
+      });
+      setLogSuccess(`Logged ₹${amount.toLocaleString('en-IN')} for ${dayLabel}`);
+      setLogAmount('');
+      setLogNote('');
+    } catch (err) {
+      console.error(err);
+      setLogError('Could not log expense. Try again.');
+    } finally {
+      setLogSubmitting(false);
+    }
+  }
 
   if (loading && !data) {
     return (
@@ -234,7 +294,7 @@ export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
           <div className="lg:col-span-2 bg-surface-white p-6 sm:p-8 rounded-3xl border border-surface-subtle shadow-card">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-display font-bold text-xl text-ink flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-brand" /> September 2026
+                <CalendarIcon className="w-5 h-5 text-brand" /> {formatGridMonthLabel(data.days)}
               </h3>
               <span className="text-xs text-ink-muted font-medium">Click a day to view agenda</span>
             </div>
@@ -320,7 +380,7 @@ export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
             </div>
 
             <div className="pt-4 mt-4 border-t border-surface-subtle">
-              <div className="flex items-center justify-between text-xs font-bold text-ink">
+              <div className="flex items-center justify-between text-xs font-bold text-ink mb-4">
                 <span>Day Spend Estimate:</span>
                 <span>
                   ₹
@@ -329,6 +389,72 @@ export const CalendarTimelinePage: React.FC<{ tripId?: string }> = ({
                     .toLocaleString('en-IN')}
                 </span>
               </div>
+
+              {/* Log Expense for the Selected Day */}
+              <form
+                onSubmit={(e) =>
+                  handleLogExpense(
+                    e,
+                    new Date(activeDaySchedule.date).toLocaleDateString('en-IN', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    }),
+                  )
+                }
+                className="space-y-2 rounded-2xl bg-surface/60 border border-surface-subtle p-3"
+              >
+                <p className="text-xs font-bold text-ink flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5 text-brand-dark" /> Log expense for this day
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={logCategory}
+                    onChange={(e) => setLogCategory(e.target.value as ExpenseCategory)}
+                    className="col-span-1 rounded-lg border border-surface-subtle bg-surface-white px-2 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-brand"
+                  >
+                    {EXPENSE_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Amount (₹)"
+                    value={logAmount}
+                    onChange={(e) => setLogAmount(e.target.value)}
+                    className="col-span-1 rounded-lg border border-surface-subtle bg-surface-white px-2 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-brand"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Note (optional)"
+                  value={logNote}
+                  onChange={(e) => setLogNote(e.target.value)}
+                  className="w-full rounded-lg border border-surface-subtle bg-surface-white px-2 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+                <button
+                  type="submit"
+                  disabled={logSubmitting}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-brand text-ink text-xs font-bold py-2 hover:bg-brand-hover transition-colors disabled:opacity-60"
+                >
+                  {logSubmitting ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="w-3.5 h-3.5" />
+                  )}
+                  {logSubmitting ? 'Logging...' : 'Log Expense'}
+                </button>
+                {logSuccess && (
+                  <p className="flex items-center gap-1 text-[11px] font-semibold text-success">
+                    <CheckCircle2 className="w-3 h-3" /> {logSuccess}
+                  </p>
+                )}
+                {logError && <p className="text-[11px] font-semibold text-danger">{logError}</p>}
+              </form>
             </div>
           </div>
         </div>

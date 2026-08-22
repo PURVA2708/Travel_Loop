@@ -185,12 +185,13 @@ model TripCollaborator {
 }
 
 model SavedDestination {
-  id     String @id @default(uuid())
-  userId String @map("user_id")
-  cityId String @map("city_id")
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  cityId    String   @map("city_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, cityId])
   @@map("saved_destinations")

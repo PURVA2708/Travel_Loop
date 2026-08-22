@@ -21,7 +21,7 @@ export function DashboardPage() {
     <PageContainer>
       <div className="mb-6 rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-6 sm:p-10">
         <h1 className="font-display text-2xl font-extrabold text-ink sm:text-4xl">
-          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 👋
+          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
         </h1>
         <p className="mt-2 max-w-md text-sm text-ink/70">
           Where to next? Build a new multi-city itinerary or pick up where you left off.

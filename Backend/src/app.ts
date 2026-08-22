@@ -9,7 +9,9 @@ import budgetRoutes from './modules/budget/routes';
 import calendarRoutes from './modules/calendar/routes';
 import { publicShareRouter, tripShareRouter } from './modules/share/routes';
 import adminRoutes from './modules/admin/routes';
+import aiRoutes from './modules/ai/routes';
 import { errorHandler } from './middleware/error.middleware';
+import { requireAuth } from './middleware/auth.middleware';
 
 export const createApp = (): Express => {
   const app = express();
@@ -56,11 +58,12 @@ export const createApp = (): Express => {
   v1.use('/cities', citiesRoutes);
   v1.use('/activities', activitiesRoutes);
   v1.use('/trips', tripsRouter);
-  v1.use('/trips/:id/budget', budgetRoutes);
-  v1.use('/trips/:id/calendar', calendarRoutes);
-  v1.use('/trips/:id/share', tripShareRouter);
+  v1.use('/trips/:id/budget', requireAuth, budgetRoutes);
+  v1.use('/trips/:id/calendar', requireAuth, calendarRoutes);
+  v1.use('/trips/:id/share', requireAuth, tripShareRouter);
   v1.use('/share', publicShareRouter);
   v1.use('/admin', adminRoutes);
+  v1.use('/ai', aiRoutes);
 
   app.use('/api/v1', v1);
 

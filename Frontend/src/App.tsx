@@ -42,8 +42,14 @@ const SharedPageRoute: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <Routes>
-      {/* Main App Layout */}
-      <Route element={<AppLayout />}>
+      {/* Main App Layout — every screen here requires login */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/cities" element={<CitySearchPage />} />
@@ -63,14 +69,7 @@ export const App: React.FC = () => {
         <Route path="/admin" element={<AdminAnalyticsPage />} />
 
         {/* User Profile */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       {/* Standalone Shared Page */}

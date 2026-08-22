@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 type ModalProps = {
@@ -48,7 +49,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidthClassName = 's
             aria-label="Close"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 hover:bg-ink/5"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
         <div className="overflow-y-auto px-5 py-4">{children}</div>

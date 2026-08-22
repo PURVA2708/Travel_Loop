@@ -1,23 +1,69 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Compass } from 'lucide-react';
+import { Compass, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+
+const HIGHLIGHTS = [
+  { icon: MapPin, text: 'Curated activities across 15+ world-class cities' },
+  { icon: ShieldCheck, text: 'Your itinerary, budget, and data stay private' },
+];
 
 export const AuthLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
-        <Link to="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-12 h-12 rounded-full bg-brand flex items-center justify-center text-ink shadow-sm group-hover:scale-105 transition-transform">
-            <Compass className="w-7 h-7 stroke-[2.5]" />
+    <div className="min-h-screen w-full bg-surface lg:grid lg:grid-cols-2">
+      {/* Left: brand panel — desktop only */}
+      <div className="hero-banner-gradient relative hidden flex-col justify-between overflow-hidden px-12 py-12 text-surface-white lg:flex">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-brand/10 blur-3xl" />
+
+        <Link to="/" className="relative flex items-center gap-2.5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-ink shadow-sm">
+            <Compass className="h-6 w-6 stroke-[2.5]" />
           </div>
-          <span className="text-2xl font-extrabold tracking-tight text-ink">
-            Globe<span className="text-brand-dark">Trotter</span>
+          <span className="text-xl font-extrabold tracking-tight">
+            Globe<span className="text-brand">Trotter</span>
           </span>
         </Link>
+
+        <div className="relative max-w-md">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs font-bold text-brand">
+            <Sparkles className="h-3.5 w-3.5" />
+            Next-Gen AI Travel Platform
+          </span>
+          <h1 className="mt-5 font-display text-4xl font-extrabold leading-tight">
+            Plan trips that feel like they planned themselves.
+          </h1>
+          <p className="mt-4 text-sm text-surface-white/70">
+            Multi-city itineraries, budget tracking, and destination discovery — all in one place.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-4">
+            {HIGHLIGHTS.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-white/10">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <p className="text-sm text-surface-white/80">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="relative text-xs text-surface-white/40">© 2026 GlobeTrotter. All rights reserved.</p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <Outlet />
+      {/* Right: form panel */}
+      <div className="flex flex-col justify-center px-4 py-12 sm:px-6 lg:px-16">
+        <div className="mx-auto w-full max-w-[420px]">
+          <Link to="/" className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-ink shadow-sm">
+              <Compass className="h-6 w-6 stroke-[2.5]" />
+            </div>
+            <span className="text-xl font-extrabold tracking-tight text-ink">
+              Globe<span className="text-brand-dark">Trotter</span>
+            </span>
+          </Link>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

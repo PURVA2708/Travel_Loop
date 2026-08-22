@@ -10,6 +10,8 @@ import {
   Layers,
   Database,
   Terminal,
+  Link2,
+  BarChart3,
 } from 'lucide-react';
 import { MOCK_TRIP_ID, MOCK_SHARE_SLUG } from '../services/api.ts';
 
@@ -141,7 +143,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
           <div className="p-4 rounded-2xl bg-surface border border-surface-subtle">
-            <p className="font-bold text-ink mb-2">💰 /api/v1/trips/:id/budget</p>
+            <p className="font-bold text-ink mb-2 flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-brand-dark" /> /api/v1/trips/:id/budget
+            </p>
             <ul className="space-y-1 text-ink-muted text-[11px]">
               <li>GET / - Full breakdown</li>
               <li>POST /expenses - Add expense</li>
@@ -150,14 +154,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             </ul>
           </div>
           <div className="p-4 rounded-2xl bg-surface border border-surface-subtle">
-            <p className="font-bold text-ink mb-2">📅 /api/v1/trips/:id/calendar</p>
+            <p className="font-bold text-ink mb-2 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-brand-dark" /> /api/v1/trips/:id/calendar
+            </p>
             <ul className="space-y-1 text-ink-muted text-[11px]">
               <li>GET / - Day-by-day feed</li>
               <li>Includes stops, events & actual costs</li>
             </ul>
           </div>
           <div className="p-4 rounded-2xl bg-surface border border-surface-subtle">
-            <p className="font-bold text-ink mb-2">🔗 /api/v1/share</p>
+            <p className="font-bold text-ink mb-2 flex items-center gap-1.5">
+              <Link2 className="w-3.5 h-3.5 text-brand-dark" /> /api/v1/share
+            </p>
             <ul className="space-y-1 text-ink-muted text-[11px]">
               <li>POST /trips/:id/share - Slug</li>
               <li>GET /:slug - Public (No Auth)</li>
@@ -165,7 +173,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             </ul>
           </div>
           <div className="p-4 rounded-2xl bg-surface border border-surface-subtle">
-            <p className="font-bold text-ink mb-2">📊 /api/v1/admin</p>
+            <p className="font-bold text-ink mb-2 flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5 text-brand-dark" /> /api/v1/admin
+            </p>
             <ul className="space-y-1 text-ink-muted text-[11px]">
               <li>GET /stats/overview - KPIs</li>
               <li>GET /stats/top-cities</li>

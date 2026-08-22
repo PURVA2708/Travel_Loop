@@ -21,7 +21,7 @@ interface BudgetDonutChartProps {
 const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
   transport: { label: 'Transport', color: '#2F80ED' },
   stay: { label: 'Accommodation & Stay', color: '#8B5CF6' },
-  activities: { label: 'Activities & Tours', color: '#00EB5B' },
+  activities: { label: 'Activities & Tours', color: '#A9784F' },
   meals: { label: 'Meals & Dining', color: '#F5A623' },
   misc: { label: 'Miscellaneous', color: '#6B7280' },
 };
@@ -32,7 +32,7 @@ export const BudgetDonutChart: React.FC<BudgetDonutChartProps> = ({ data }) => {
       name: CATEGORY_CONFIG[key]?.label || key,
       categoryKey: key,
       value: Number(value) || 0,
-      color: CATEGORY_CONFIG[key]?.color || '#00EB5B',
+      color: CATEGORY_CONFIG[key]?.color || '#A9784F',
     }))
     .filter((item) => item.value > 0);
 

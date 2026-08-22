@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Compass, Ticket, Bookmark, User } from 'lucide-react';
+import { LayoutDashboard, Compass, Briefcase, Bookmark, User } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { clsx } from 'clsx';
 
@@ -9,8 +9,8 @@ export const BottomNav: React.FC = () => {
 
   const tabs = [
     { label: 'Home', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Trips', path: '/trips', icon: Briefcase },
     { label: 'Cities', path: '/cities', icon: Compass },
-    { label: 'Activities', path: '/activities', icon: Ticket },
     { label: 'Saved', path: isAuthenticated ? '/profile?tab=saved' : '/login', icon: Bookmark },
     { label: 'Profile', path: isAuthenticated ? '/profile' : '/login', icon: User },
   ];

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Luggage } from 'lucide-react';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -23,7 +24,7 @@ export function MyTripsPage() {
 
       {!trips || trips.length === 0 ? (
         <EmptyState
-          icon="🧳"
+          icon={<Luggage />}
           title="No trips yet"
           description="Plan your first multi-city trip — add stops, activities, and track your budget as you go."
           action={
