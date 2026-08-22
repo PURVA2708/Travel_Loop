@@ -56,3 +56,9 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 export default app;
+import { app } from './app.js';
+import { env } from './lib/env.js';
+
+app.listen(env.port, () => {
+  console.log(`GlobeTrotter API listening on http://localhost:${env.port}`);
+});

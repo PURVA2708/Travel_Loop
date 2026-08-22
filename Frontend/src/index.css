@@ -35,4 +35,12 @@
 .card-hover:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 30px rgba(0, 43, 17, 0.08);
+    @apply bg-surface text-ink font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
