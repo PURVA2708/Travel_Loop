@@ -298,7 +298,7 @@ export type Trip = {
 };
 
 export type TripSummary = Omit<Trip, 'stops'> & {
-  stops: Array<{ id: string; cityId: string }>;
+  stops: Array<{ id: string; cityId: string; city?: { name: string; imageUrl: string | null } }>;
 };
 
 export type ItineraryDay = {

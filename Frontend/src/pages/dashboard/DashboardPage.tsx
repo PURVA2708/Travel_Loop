@@ -8,7 +8,6 @@ import {
   Heart,
   ChevronRight,
   ChevronLeft,
-  Sparkles,
   MapPin,
   Calendar,
   Flame,
@@ -109,11 +108,6 @@ export const DashboardPage: React.FC = () => {
           {/* Left Column: Copy & Actions */}
           <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between z-10">
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand/20 text-brand text-xs font-bold mb-4">
-                <Sparkles className="w-3.5 h-3.5 fill-brand" />
-                Next-Gen AI Travel Platform
-              </div>
-
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-surface-white">
                 Where to next,{' '}
                 <span className="text-brand">

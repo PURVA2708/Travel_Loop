@@ -120,14 +120,14 @@ export const LoginPage: React.FC = () => {
             onClick={() => handleDemoLogin('user')}
             className="rounded-lg border border-ink-border/30 bg-surface px-2 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-brand"
           >
-            Demo Traveler
+            User 1
           </button>
           <button
             type="button"
             onClick={() => handleDemoLogin('admin')}
             className="rounded-lg border border-ink-border/30 bg-surface px-2 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-brand"
           >
-            Admin Sarah
+            Admin
           </button>
         </div>
       </div>
