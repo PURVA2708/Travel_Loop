@@ -138,14 +138,51 @@ Built just enough to make Person B's vertical testable end-to-end — each file 
 
 | Item | Status | Blocker |
 |---|---|---|
-| `prisma migrate dev` (create actual DB tables) | ⛔ Not run | Local Postgres superuser password was forgotten by the user; needs either a local password reset or a Neon/Supabase cloud connection string |
-| `prisma:seed` | ⛔ Not run | Same — depends on migration first |
-| End-to-end test (signup → create trip → add stop → add activity → view itinerary) | ⛔ Not run | Same — needs a live DB |
 | Person A's screens (real Login/Signup polish, Dashboard content, City/Activity Search UI) | Not started | Out of scope for Person B — stubs exist only to unblock Trips testing |
 | Person C's screens (Budget breakdown, Calendar, Public sharing, Admin) | Not started | Out of scope for Person B — `TripExpense`/`ShareLink`/`TripCollaborator` tables already exist in schema, ready for Person C |
-| Cloudinary image upload for trip cover photos | Not implemented | `coverPhotoUrl` currently accepts a plain URL string only (no file upload widget) |
 
-**Next step once a `DATABASE_URL` is available:** run `prisma migrate dev` + `prisma:seed` in `Backend/`, then walk through the full Create Trip → Itinerary Builder → Itinerary View flow in the browser to verify the real (not just type-checked) behavior.
+Everything else originally in Person B's scope (DB + API + UI for Screens #3–#6, responsive QA, cover-photo upload) is done — see 5.1 and 5.2 below.
+
+---
+
+## 5.1 Session 2 (2026-08-22, continued) — Live DB verification
+
+The local Postgres password was recovered (`tirth3086`) and a `globetrotter` database already existed on the instance. Found the instance is **not** on the default port — it's listening on **`localhost:8080`**, not 5432 (confirmed via `Get-NetTCPConnection`).
+
+- Created `Backend/.env` with `DATABASE_URL="postgresql://postgres:tirth3086@localhost:8080/globetrotter?schema=public"` (confirmed gitignored before writing it).
+- Ran `npx prisma migrate dev --name init` — created all 11 tables cleanly (`_prisma_migrations`, `users`, `cities`, `activities`, `trips`, `trip_stops`, `trip_activities`, `trip_expenses`, `trip_collaborators`, `share_links`, `saved_destinations`). Note: Prisma's auto-seed-after-migrate did **not** actually populate rows (ran silently but tables stayed empty) — had to run `npx prisma db seed` explicitly, which worked (1 user, 15 cities, 53 activities).
+- `npx tsc --noEmit` in `Backend/` — still clean.
+- Started the backend (`npx tsx src/server.ts`, port 4000) and ran a full curl-based E2E pass against the live DB: login → create trip → add stop → add activity → get itinerary. All endpoints returned correct data, including the day-grouped `activitiesByDate` view and running `totalActivityCost`. One schema note for future reference: the create-trip payload field is `name`, not `title` — matches `trips.schema.ts`, just flagging since it's an easy mistake when wiring up API calls by hand.
+- Created `Frontend/.env` from `.env.example` and started the Vite dev server (port 5173).
+- Drove the real UI through Chrome automation end-to-end, logged in as the seeded demo user, and walked the entire Person B flow: Login → My Trips (empty state) → Create Trip (Screen #3) → Itinerary Builder (Screen #5, added a Bangkok stop via `CityPickerModal`, added an activity via `ActivityPickerModal`, confirmed running cost updates live) → Itinerary View (Screen #6, day-by-day timeline rendered correctly with cost). Every screen matched the intended design and worked against the real backend, not just `tsc --noEmit`.
+- **Testing note, not an app bug:** browser-automation clicks on React Router `<Link>`/`<NavLink>` elements were unreliable in this session's Chrome automation tool (clicks landed on the correct element per `elementFromPoint` but didn't trigger navigation), while `<button>` clicks (form submits) worked fine. Dispatching `.click()` on the anchor via JS worked every time. Also saw one false alarm where a hard page reload appeared to redirect to `/trips`/`/login` — turned out to be a screenshot taken before Vite finished transpiling on cold load; a 2s wait after `navigate()` showed the correct page every time. Neither is a real product bug — just noted here so a future session doesn't re-chase the same red herring.
+- Cleaned up: deleted the test trip via the API after verification, restored DB to the clean seeded state (0 trips, 1 user, 15 cities, 53 activities). Backend and frontend dev servers were left running in the background for this session (ports 4000 and 5173).
+
+**Status: the entire Trip Core & Itinerary vertical (Screens #3–#6) is now verified working end-to-end against a live database, not just type-checked.**
+
+---
+
+## 5.2 Session 2 (2026-08-22, continued) — Responsive QA + Cloudinary cover-photo upload
+
+Closed out the two remaining gaps from Section 5's original list.
+
+**Responsive QA (roadmap Phase 6):** The Chrome automation tool's `resize_window` didn't actually shrink the browser viewport in this environment (window stayed at its OS-managed size regardless of the requested dimensions), so used a same-origin `<iframe>` injected into a loaded page as a viewport-emulation harness instead — Tailwind's width-based breakpoints respond correctly to an iframe's own rendered width, so this gives accurate results without relying on `resize_window`. Checked all 4 screens at 390px (mobile), 768–900px (tablet), and 1100px (desktop):
+- **My Trips (#4):** single column → 2-col grid at `md:` (768px) → correct card grid, bottom tab bar shows below `lg:`, header nav switches to the pill+avatar-only mobile header correctly.
+- **Create Trip (#3):** start/end date fields stack to one column below `sm:` (640px) as coded, no overflow.
+- **Itinerary Builder (#5):** confirmed the mobile inline-expansion vs. desktop two-pane split is real, intentional, and correctly implemented in `ItineraryBuilderPage.tsx` (`hidden lg:block` desktop panel / `lg:hidden` mobile panel, `lg:grid-cols-[340px_1fr]`) — matches the roadmap's Section 5.3 spec exactly.
+- **Itinerary View (#6):** day-by-day timeline flows cleanly at 390px, header wraps correctly, no horizontal overflow.
+
+No responsive bugs found — the original build already handled this correctly. No code changes were needed here, just verification.
+
+**Cloudinary cover-photo upload:** the user set up a real Cloudinary account and an unsigned upload preset (cloud name `yjjqyocf`, preset `globetrotter`, folder `globetrotter/trip-covers`). Implemented:
+- `Frontend/src/lib/cloudinary.ts` — `uploadImageToCloudinary(file)`, posts directly to Cloudinary's unsigned upload endpoint (`https://api.cloudinary.com/v1_1/{cloud}/image/upload`) with `upload_preset` and `folder` fields. No backend involvement needed since the preset is unsigned — this was the simplest option for a project at this stage (no API secret has to live anywhere in app code).
+- `Frontend/src/components/ui/ImageUploadField.tsx` — new shared component: dashed dropzone → click to pick a file → uploads with a spinner → shows the resulting image with a remove (×) button. Validates image MIME type and a 5MB size cap client-side before uploading.
+- Wired into `CreateTripPage.tsx`, replacing the old plain-text `coverPhotoUrl` `Input` with `<ImageUploadField>`.
+- Added `VITE_CLOUDINARY_CLOUD_NAME` / `VITE_CLOUDINARY_UPLOAD_PRESET` to `vite-env.d.ts`, `Frontend/.env.example` (placeholder values), and `Frontend/.env` (real values — gitignored, not committed).
+- **Verified live, not just type-checked:** restarted the Vite dev server to pick up the new env vars, logged in, used the browser automation's `file_upload` tool to attach a generated test PNG to the real file input, confirmed it uploaded to `res.cloudinary.com/yjjqyocf/image/upload/.../globetrotter/trip-covers/test-cover.png`, then created a trip with that URL via the API and confirmed it round-tripped correctly and rendered as the actual card background image on the My Trips page. Cleaned up the test trip afterward. (The tiny test PNG itself is still sitting in the user's Cloudinary media library under `globetrotter/trip-covers` — harmless, but worth deleting from the Cloudinary dashboard if they want a clean media library before the demo.)
+- `npx tsc --noEmit` clean in both `Backend/` and `Frontend/` after these changes.
+
+**Status: Person B's full scope — DB + API + UI for Screens #3–#6, responsive QA, and cover-photo upload — is complete and verified end-to-end.**
 
 ---
 
@@ -184,10 +221,10 @@ Frontend/
 └── src/
     ├── main.tsx, App.tsx, index.css, vite-env.d.ts [new]
     ├── types/index.ts                              [new]
-    ├── lib/{api,queryClient,money,cn}.ts            [new]
+    ├── lib/{api,queryClient,money,cn,cloudinary}.ts [new — cloudinary.ts added session 2]
     ├── store/authStore.ts                          [new]
     ├── components/
-    │   ├── ui/{Button,Input,Card,Modal,PageContainer,Spinner,EmptyState}.tsx [new]
+    │   ├── ui/{Button,Input,Card,Modal,PageContainer,Spinner,EmptyState,ImageUploadField}.tsx [new — ImageUploadField added session 2]
     │   └── layout/{AppShell,RequireAuth}.tsx        [new]
     ├── features/
     │   ├── auth/api.ts                             [new]

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
+import { ImageUploadField } from '@/components/ui/ImageUploadField';
 import { getApiErrorMessage } from '@/lib/api';
 import { useCreateTrip } from '@/features/trips/hooks';
 
@@ -63,12 +64,7 @@ export function CreateTripPage() {
           placeholder="What's this trip about?"
         />
 
-        <Input
-          label="Cover photo URL (optional)"
-          value={coverPhotoUrl}
-          onChange={(e) => setCoverPhotoUrl(e.target.value)}
-          placeholder="https://..."
-        />
+        <ImageUploadField label="Cover photo (optional)" value={coverPhotoUrl} onChange={setCoverPhotoUrl} />
 
         {error && <p className="text-sm text-danger">{error}</p>}
 
