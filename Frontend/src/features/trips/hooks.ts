@@ -135,3 +135,11 @@ export function useActivitiesForCity(cityId: string | undefined) {
     enabled: !!cityId,
   });
 }
+
+export function useCreateShareLink() {
+  return useMutation({ mutationFn: tripsApi.createShareLink });
+}
+
+export function useSuggestItinerary() {
+  return useMutation({ mutationFn: tripsApi.suggestItinerary });
+}

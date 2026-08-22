@@ -79,6 +79,7 @@ export async function createTrip(userId: string, input: CreateTripInput) {
       startDate: input.startDate,
       endDate: input.endDate,
       coverPhotoUrl: input.coverPhotoUrl,
+      totalBudget: input.totalBudget,
     },
   });
 }

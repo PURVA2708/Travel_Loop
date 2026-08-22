@@ -60,9 +60,9 @@ export const DailySpendBarChart: React.FC<DailySpendBarChartProps> = ({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={mockDailyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-          <XAxis dataKey="day" tick={{ fill: '#4A6B56', fontSize: 11 }} tickLine={false} />
+          <XAxis dataKey="day" tick={{ fill: '#7A6A5E', fontSize: 11 }} tickLine={false} />
           <YAxis
-            tick={{ fill: '#4A6B56', fontSize: 11 }}
+            tick={{ fill: '#7A6A5E', fontSize: 11 }}
             tickLine={false}
             tickFormatter={(val) => `₹${val / 1000}k`}
           />
@@ -80,7 +80,7 @@ export const DailySpendBarChart: React.FC<DailySpendBarChartProps> = ({
               }}
             />
           )}
-          <Bar dataKey="spend" fill="#002B11" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="spend" fill="#2E211B" radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

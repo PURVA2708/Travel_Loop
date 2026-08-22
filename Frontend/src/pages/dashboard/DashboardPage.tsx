@@ -373,7 +373,7 @@ export const DashboardPage: React.FC = () => {
                         : `${act.durationMinutes} mins`}
                     </span>
                     <span className="text-sm font-extrabold text-ink">
-                      ${act.cost.toFixed(0)} <span className="text-[11px] font-normal text-ink-muted">/ person</span>
+                      ${Number(act.cost).toFixed(0)} <span className="text-[11px] font-normal text-ink-muted">/ person</span>
                     </span>
                   </div>
                 </div>
@@ -393,9 +393,9 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link to="/cities">
+            <Link to="/trips/new">
               <Button variant="primary" size="md" pill leftIcon={<PlusCircle className="w-4 h-4 stroke-[2.5]" />}>
-                Explore & Add Stops
+                Plan a New Trip
               </Button>
             </Link>
           </div>

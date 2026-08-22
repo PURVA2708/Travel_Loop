@@ -10,6 +10,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { GripVertical, ChevronUp, ChevronDown, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatMoney } from '@/lib/money';
 import { ActivityPickerModal } from './ActivityPickerModal';
@@ -128,7 +129,7 @@ export function StopEditor({ tripId, stop }: { tripId: string; stop: TripStop })
                         className="cursor-grab touch-none px-1 text-ink/30 active:cursor-grabbing"
                         aria-label="Drag to reorder"
                       >
-                        ⠿
+                        <GripVertical className="h-4 w-4" />
                       </button>
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-ink">{tripActivity.activity.name}</p>
@@ -144,7 +145,7 @@ export function StopEditor({ tripId, stop }: { tripId: string; stop: TripStop })
                           className="text-ink/40 hover:text-ink disabled:opacity-20"
                           aria-label="Move up"
                         >
-                          ▲
+                          <ChevronUp className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => moveActivity(index, 1)}
@@ -152,7 +153,7 @@ export function StopEditor({ tripId, stop }: { tripId: string; stop: TripStop })
                           className="text-ink/40 hover:text-ink disabled:opacity-20"
                           aria-label="Move down"
                         >
-                          ▼
+                          <ChevronDown className="h-4 w-4" />
                         </button>
                       </div>
                       <button
@@ -160,7 +161,7 @@ export function StopEditor({ tripId, stop }: { tripId: string; stop: TripStop })
                         className="ml-1 text-ink/30 hover:text-danger"
                         aria-label="Remove activity"
                       >
-                        ✕
+                        <X className="h-4 w-4" />
                       </button>
                     </li>
                   )}
@@ -171,8 +172,9 @@ export function StopEditor({ tripId, stop }: { tripId: string; stop: TripStop })
         </DndContext>
       )}
 
-      <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)} className="self-start">
-        + Add activity
+      <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)} className="self-start gap-1.5">
+        <Plus className="h-4 w-4" />
+        Add activity
       </Button>
 
       <ActivityPickerModal

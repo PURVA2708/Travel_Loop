@@ -1,14 +1,34 @@
 import { useParams, Link } from 'react-router-dom';
 import { format, eachDayOfInterval } from 'date-fns';
+import { Wallet, CalendarDays, Share2, MapPin } from 'lucide-react';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
+import { ShareModal } from '@/components/common/ShareModal';
 import { formatMoney } from '@/lib/money';
-import { useItinerary } from '@/features/trips/hooks';
+import { getApiErrorMessage } from '@/lib/api';
+import { useItinerary, useCreateShareLink } from '@/features/trips/hooks';
+import { useState } from 'react';
 
 export function ItineraryViewPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const { data: itinerary, isLoading } = useItinerary(tripId);
+  const createShareLink = useCreateShareLink();
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareSlug, setShareSlug] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  async function handleShare() {
+    if (!tripId) return;
+    setShareError(null);
+    try {
+      const { publicSlug } = await createShareLink.mutateAsync(tripId);
+      setShareSlug(publicSlug);
+      setShareOpen(true);
+    } catch (err) {
+      setShareError(getApiErrorMessage(err, 'Could not create a share link'));
+    }
+  }
 
   if (isLoading) return <PageSpinner />;
   if (!itinerary) return <PageContainer>Trip not found.</PageContainer>;
@@ -23,10 +43,36 @@ export function ItineraryViewPage() {
             {format(new Date(itinerary.endDate), 'd MMM yyyy')} · {formatMoney(itinerary.totalActivityCost)} planned
           </p>
         </div>
-        <Link to={`/trips/${tripId}/builder`}>
-          <Button variant="outline">Edit itinerary</Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to={`/budget/${tripId}`}>
+            <Button variant="outline">
+              <Wallet className="h-4 w-4" /> Budget
+            </Button>
+          </Link>
+          <Link to={`/calendar/${tripId}`}>
+            <Button variant="outline">
+              <CalendarDays className="h-4 w-4" /> Calendar
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={handleShare} isLoading={createShareLink.isPending}>
+            <Share2 className="h-4 w-4" /> Share
+          </Button>
+          <Link to={`/trips/${tripId}/builder`}>
+            <Button variant="outline">Edit itinerary</Button>
+          </Link>
+        </div>
       </div>
+
+      {shareError && <p className="mb-4 text-sm text-danger">{shareError}</p>}
+
+      {shareSlug && (
+        <ShareModal
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+          tripName={itinerary.name}
+          slug={shareSlug}
+        />
+      )}
 
       {itinerary.stops.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-ink/15 bg-surface-white px-6 py-14 text-center text-sm text-ink/50">
@@ -44,7 +90,7 @@ export function ItineraryViewPage() {
               <section key={stop.stopId}>
                 <div className="mb-3 flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand font-bold text-ink">
-                    📍
+                    <MapPin className="h-5 w-5" />
                   </span>
                   <div>
                     <h2 className="font-display text-xl font-bold text-ink">{stop.city.name}</h2>

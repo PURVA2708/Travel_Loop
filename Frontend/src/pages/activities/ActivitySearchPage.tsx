@@ -353,7 +353,7 @@ export const ActivitySearchPage: React.FC = () => {
                         : `${act.durationMinutes} mins`}
                     </span>
                     <span className="text-base font-extrabold text-ink">
-                      ${act.cost.toFixed(0)} <span className="text-xs font-normal text-ink-muted">/ person</span>
+                      ${Number(act.cost).toFixed(0)} <span className="text-xs font-normal text-ink-muted">/ person</span>
                     </span>
                   </div>
                 </div>
@@ -418,7 +418,7 @@ export const ActivitySearchPage: React.FC = () => {
               <div className="bg-surface rounded-xl p-3 text-center border border-ink-border/30">
                 <p className="text-[11px] font-medium text-ink-muted">Price</p>
                 <p className="text-base font-extrabold text-ink mt-0.5">
-                  ${selectedActivity.cost.toFixed(2)}
+                  ${Number(selectedActivity.cost).toFixed(2)}
                 </p>
               </div>
             </div>

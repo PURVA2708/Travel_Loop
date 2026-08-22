@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { Wallet, CalendarDays, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import type { TripSummary } from '@/types';
 
@@ -48,8 +49,22 @@ export function TripCard({ trip, onDelete }: { trip: TripSummary; onDelete: (id:
             aria-label="Delete trip"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink/50 hover:bg-danger/10 hover:text-danger"
           >
-            🗑
+            <Trash2 className="h-4 w-4" />
           </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/budget/${trip.id}`}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-ink/15 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:bg-ink/5"
+          >
+            <Wallet className="h-3.5 w-3.5" /> Budget
+          </Link>
+          <Link
+            to={`/calendar/${trip.id}`}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-ink/15 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:bg-ink/5"
+          >
+            <CalendarDays className="h-3.5 w-3.5" /> Calendar
+          </Link>
         </div>
       </div>
     </Card>

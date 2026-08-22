@@ -309,8 +309,8 @@ export const CitySearchPage: React.FC = () => {
                   </button>
 
                   {/* Popularity indicator */}
-                  <div className="absolute bottom-3 right-3 bg-brand text-ink text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
-                    ★ {city.popularityScore}
+                  <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-brand text-ink text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
+                    <Star className="h-3 w-3 fill-current" /> {city.popularityScore}
                   </div>
                 </div>
 
@@ -337,7 +337,7 @@ export const CitySearchPage: React.FC = () => {
                       {city.activityCount || 4} Activities
                     </span>
                     <span className="font-bold text-ink">
-                      Cost: {'$'.repeat(Math.min(Math.max(Math.round(city.costIndex), 1), 4))}
+                      Cost: {'$'.repeat(Math.min(Math.max(Math.round(Number(city.costIndex)), 1), 4))}
                     </span>
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export const CitySearchPage: React.FC = () => {
               <div className="bg-surface rounded-xl p-3 text-center border border-ink-border/30">
                 <p className="text-[11px] font-medium text-ink-muted">Cost Index</p>
                 <p className="text-base font-extrabold text-ink mt-0.5">
-                  {currentCityForModal.costIndex.toFixed(1)} / 5.0
+                  {Number(currentCityForModal.costIndex).toFixed(1)} / 5.0
                 </p>
               </div>
               <div className="bg-surface rounded-xl p-3 text-center border border-ink-border/30">
@@ -462,7 +462,9 @@ export const CitySearchPage: React.FC = () => {
                       <div>
                         <p className="text-xs font-bold text-ink line-clamp-1">{act.name}</p>
                         <div className="flex items-center gap-2 text-[11px] text-ink-muted mt-0.5">
-                          <span className="text-amber-500 font-bold">★ {act.rating}</span>
+                          <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                            <Star className="h-3 w-3 fill-current" /> {act.rating}
+                          </span>
                           <span>•</span>
                           <span>{act.durationMinutes} mins</span>
                           <span>•</span>

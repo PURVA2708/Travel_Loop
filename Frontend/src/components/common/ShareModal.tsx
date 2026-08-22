@@ -19,7 +19,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   if (!isOpen) return null;
 
-  const shareUrl = `${window.location.origin}/#/share/${slug}`;
+  const shareUrl = `${window.location.origin}/share/${slug}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);

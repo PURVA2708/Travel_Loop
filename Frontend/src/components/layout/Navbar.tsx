@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Search, User as UserIcon, LogOut, Menu, X, Bookmark, Sparkles } from 'lucide-react';
+import { BarChart3, Bookmark, Compass, LogOut, PlusCircle, Sparkles, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useUiStore } from '../../store/uiStore';
 import { Button } from '../common/Button';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { toggleSidebar } = useUiStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -20,16 +18,8 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 w-full glass-nav border-b border-ink-border/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand Logo & Hamburger */}
+        {/* Left: Brand Logo */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleSidebar}
-            className="p-2 -ml-2 rounded-lg text-ink hover:bg-surface md:hidden"
-            aria-label="Toggle Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-ink shadow-sm group-hover:scale-105 transition-transform">
               <Compass className="w-6 h-6 stroke-[2.5]" />
@@ -49,6 +39,12 @@ export const Navbar: React.FC = () => {
             Dashboard
           </Link>
           <Link
+            to="/trips"
+            className="px-3.5 py-2 text-sm font-medium text-ink hover:text-brand-dark hover:bg-surface rounded-full transition-colors"
+          >
+            My Trips
+          </Link>
+          <Link
             to="/cities"
             className="px-3.5 py-2 text-sm font-medium text-ink hover:text-brand-dark hover:bg-surface rounded-full transition-colors"
           >
@@ -64,10 +60,18 @@ export const Navbar: React.FC = () => {
 
         {/* Right: Actions & User Dropdown */}
         <div className="flex items-center gap-2.5">
+          <Link
+            to="/trips/new"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand text-xs font-bold text-ink shadow-sm hover:bg-brand-dark transition-colors"
+          >
+            <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+            Plan New Trip
+          </Link>
+
           {/* TripAdvisor-inspired AI Pill */}
           <Link
             to="/cities"
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-brand text-xs font-bold text-ink hover:bg-brand/10 transition-colors"
+            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-brand text-xs font-bold text-ink hover:bg-brand/10 transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5 text-brand-dark fill-brand" />
             AI Assistant
@@ -125,6 +129,17 @@ export const Navbar: React.FC = () => {
                       <Bookmark className="w-4 h-4 text-ink-muted" />
                       Saved Wishlist
                     </Link>
+
+                    {user.role?.toLowerCase() === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-ink hover:bg-surface transition-colors"
+                      >
+                        <BarChart3 className="w-4 h-4 text-ink-muted" />
+                        Analytics Dashboard
+                      </Link>
+                    )}
 
                     <div className="border-t border-ink-border/20 my-1" />
 

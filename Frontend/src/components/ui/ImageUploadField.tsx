@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Camera, X } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
 
@@ -51,10 +52,10 @@ export function ImageUploadField({
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-ink/70 text-sm font-bold text-surface-white hover:bg-ink"
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-ink/70 text-surface-white hover:bg-ink"
             aria-label="Remove cover photo"
           >
-            ×
+            <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
@@ -71,7 +72,7 @@ export function ImageUploadField({
             </>
           ) : (
             <>
-              <span className="text-2xl">📷</span>
+              <Camera className="h-6 w-6" />
               Click to upload a cover photo
             </>
           )}

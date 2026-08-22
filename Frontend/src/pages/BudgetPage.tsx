@@ -410,11 +410,11 @@ export const BudgetPage: React.FC<{ tripId?: string }> = ({ tripId = MOCK_TRIP_I
                   onChange={(e) => setNewCategory(e.target.value as ExpenseCategory)}
                   className="w-full bg-surface px-4 py-3 rounded-2xl text-sm border border-gray-200 text-ink focus:outline-none focus:ring-2 focus:ring-brand font-medium cursor-pointer"
                 >
-                  <option value="transport">✈️ Transport & Flights</option>
-                  <option value="stay">🏨 Accommodation & Stay</option>
-                  <option value="activities">🏄 Activities & Tours</option>
-                  <option value="meals">🍽️ Meals & Dining</option>
-                  <option value="misc">🏷️ Miscellaneous</option>
+                  <option value="transport">Transport & Flights</option>
+                  <option value="stay">Accommodation & Stay</option>
+                  <option value="activities">Activities & Tours</option>
+                  <option value="meals">Meals & Dining</option>
+                  <option value="misc">Miscellaneous</option>
                 </select>
               </div>
 

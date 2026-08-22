@@ -9,6 +9,7 @@ export const createTripSchema = z
     startDate: isoDate,
     endDate: isoDate,
     coverPhotoUrl: z.string().url().optional(),
+    totalBudget: z.coerce.number().nonnegative().optional(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: 'endDate must be on or after startDate',
@@ -22,6 +23,7 @@ export const updateTripSchema = z
     startDate: isoDate.optional(),
     endDate: isoDate.optional(),
     coverPhotoUrl: z.string().url().optional(),
+    totalBudget: z.coerce.number().nonnegative().optional(),
     status: z.enum(['draft', 'planned', 'completed']).optional(),
   })
   .refine((data) => !data.startDate || !data.endDate || data.endDate >= data.startDate, {

@@ -17,6 +17,7 @@ export async function createTrip(input: {
   startDate: string;
   endDate: string;
   coverPhotoUrl?: string;
+  totalBudget?: number;
 }) {
   const { data } = await api.post<Trip>('/trips', input);
   return data;
@@ -28,6 +29,7 @@ export async function updateTrip(tripId: string, input: Partial<{
   startDate: string;
   endDate: string;
   coverPhotoUrl: string;
+  totalBudget: number;
   status: Trip['status'];
 }>) {
   const { data } = await api.patch<Trip>(`/trips/${tripId}`, input);
@@ -91,13 +93,34 @@ export async function reorderActivities(tripId: string, stopId: string, orderedT
 }
 
 // --- Cities & Activities catalog (Person A's domain; read-only here) ----
+// These endpoints return { success, data, pagination } — unwrap to the array.
 
 export async function fetchCities(search?: string) {
-  const { data } = await api.get<City[]>('/cities', { params: search ? { search } : undefined });
-  return data;
+  const { data } = await api.get<{ data: City[] }>('/cities', { params: search ? { search } : undefined });
+  return data.data;
 }
 
 export async function fetchActivitiesForCity(cityId: string) {
-  const { data } = await api.get<Activity[]>('/activities', { params: { cityId } });
-  return data;
+  const { data } = await api.get<{ data: Activity[] }>('/activities', { params: { cityId } });
+  return data.data;
+}
+
+// --- AI itinerary suggestions --------------------------------------------
+
+export interface AiItinerarySuggestion {
+  rationale: string;
+  cities: City[];
+  activities: Activity[];
+}
+
+export async function suggestItinerary(input: { startDate: string; endDate: string; interests?: string }) {
+  const { data } = await api.post<{ data: AiItinerarySuggestion }>('/ai/suggest-itinerary', input);
+  return data.data;
+}
+
+// --- Sharing (Person C's domain) ------------------------------------------
+
+export async function createShareLink(tripId: string) {
+  const { data } = await api.post<{ data: { publicSlug: string } }>(`/trips/${tripId}/share`, {});
+  return data.data;
 }

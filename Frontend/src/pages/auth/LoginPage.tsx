@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Zap } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
@@ -49,105 +49,96 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
-      <Card className="w-full max-w-[440px] shadow-modal">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-extrabold text-ink tracking-tight font-display">
-            Globe<span className="text-brand">Trotter</span>
-          </h2>
-          <p className="text-xs text-ink-muted mt-1">
-            Sign in to access your planned trips, multi-city itineraries, and budget tracking
-          </p>
+    <Card className="shadow-modal">
+      <div className="mb-6">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">Welcome back</h2>
+        <p className="mt-1.5 text-sm text-ink-muted">
+          Sign in to access your trips, multi-city itineraries, and budget tracking.
+        </p>
+      </div>
+
+      {error && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-danger/20 bg-danger/10 p-3 text-xs font-medium text-danger animate-in fade-in">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{error}</span>
         </div>
+      )}
 
-        {error && (
-          <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Email Address"
+          type="email"
+          placeholder="you@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          leftIcon={<Mail className="w-4 h-4" />}
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
           <Input
-            label="Email Address"
-            type="email"
-            placeholder="you@example.com"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            leftIcon={<Mail className="w-4 h-4" />}
-          />
-
-          <div>
-            <Input
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              leftIcon={<Lock className="w-4 h-4" />}
-              rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="focus:outline-none hover:text-ink"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              }
-            />
-            <div className="flex justify-end mt-1.5">
-              <Link
-                to="/forgot-password"
-                className="text-xs font-medium text-ink-muted hover:text-brand-dark transition-colors"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftIcon={<Lock className="w-4 h-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="focus:outline-none hover:text-ink"
               >
-                Forgot password?
-              </Link>
-            </div>
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            }
+          />
+          <div className="mt-1.5 flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-ink-muted hover:text-brand-dark transition-colors"
+            >
+              Forgot password?
+            </Link>
           </div>
+        </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            className="w-full mt-2"
-            isLoading={isLoading}
+        <Button type="submit" variant="primary" className="mt-2 w-full" isLoading={isLoading}>
+          Sign In
+        </Button>
+      </form>
+
+      {/* Demo Credentials Helper */}
+      <div className="mt-6 border-t border-ink-border/20 pt-4">
+        <p className="mb-2 flex items-center justify-center gap-1 text-center text-[11px] font-semibold text-ink-muted">
+          <Zap className="h-3 w-3" /> Quick Demo Logins:
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('user')}
+            className="rounded-lg border border-ink-border/30 bg-surface px-2 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-brand"
           >
-            Sign In
-          </Button>
-        </form>
-
-        {/* Demo Credentials Helper */}
-        <div className="mt-6 pt-4 border-t border-ink-border/20">
-          <p className="text-[11px] font-semibold text-ink-muted text-center mb-2">
-            ⚡ Quick Demo Logins:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('user')}
-              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
-            >
-              Demo Traveler
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('admin')}
-              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
-            >
-              Admin Sarah
-            </button>
-          </div>
+            Demo Traveler
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('admin')}
+            className="rounded-lg border border-ink-border/30 bg-surface px-2 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-brand"
+          >
+            Admin Sarah
+          </button>
         </div>
+      </div>
 
-        <div className="mt-6 text-center text-xs text-ink-muted">
-          Don&apos;t have an account?{' '}
-          <Link to="/signup" className="font-bold text-ink hover:text-brand-dark transition-colors">
-            Sign up now
-          </Link>
-        </div>
-      </Card>
-    </div>
+      <div className="mt-6 text-center text-xs text-ink-muted">
+        Don&apos;t have an account?{' '}
+        <Link to="/signup" className="font-bold text-ink hover:text-brand-dark transition-colors">
+          Sign up now
+        </Link>
+      </div>
+    </Card>
   );
 };
 

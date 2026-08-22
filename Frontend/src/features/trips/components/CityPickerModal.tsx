@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Star } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
@@ -41,16 +42,27 @@ export function CityPickerModal({
               onSelect(city);
               onClose();
             }}
-            className="flex items-center justify-between rounded-lg px-3 py-2.5 text-left hover:bg-surface"
+            className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-surface"
           >
-            <div>
-              <p className="text-sm font-semibold text-ink">{city.name}</p>
-              <p className="text-xs text-ink/50">
-                {city.country}
-                {city.region ? ` · ${city.region}` : ''}
-              </p>
+            <div className="flex items-center gap-3 min-w-0">
+              {city.imageUrl && (
+                <img
+                  src={city.imageUrl}
+                  alt={city.name}
+                  className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-ink">{city.name}</p>
+                <p className="text-xs text-ink/50">
+                  {city.country}
+                  {city.region ? ` · ${city.region}` : ''}
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-medium text-ink/40">★ {city.popularityScore}</span>
+            <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-ink/40">
+              <Star className="h-3 w-3 fill-current" /> {city.popularityScore}
+            </span>
           </button>
         ))}
       </div>

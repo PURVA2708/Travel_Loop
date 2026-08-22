@@ -95,6 +95,53 @@ const CITIES: Array<{
     ],
   },
   {
+    name: 'Udaipur',
+    country: 'India',
+    region: 'Rajasthan',
+    costIndex: 0.95,
+    popularityScore: 82,
+    imageUrl: 'https://images.unsplash.com/photo-1695956353120-54ce5e91632b?w=800&auto=format&fit=crop&q=80',
+    lat: 24.5854,
+    lng: 73.7125,
+    activities: [
+      { name: 'Lake Pichola boat ride', category: 'sightseeing', cost: 700, durationMinutes: 60 },
+      { name: 'City Palace guided tour', category: 'culture', cost: 500, durationMinutes: 120 },
+      { name: 'Rooftop dinner overlooking the lake', category: 'food', cost: 1800, durationMinutes: 90 },
+    ],
+  },
+  {
+    name: 'Rishikesh',
+    country: 'India',
+    region: 'Uttarakhand',
+    costIndex: 0.75,
+    popularityScore: 80,
+    imageUrl: 'https://images.unsplash.com/photo-1607406374368-809f8ec7f118?w=800&auto=format&fit=crop&q=80',
+    lat: 30.0869,
+    lng: 78.2676,
+    activities: [
+      { name: 'White water rafting', category: 'adventure', cost: 900, durationMinutes: 120 },
+      { name: 'Ganga Aarti at Triveni Ghat', category: 'culture', cost: 0, durationMinutes: 60 },
+      { name: 'Bungee jumping at Jumpin Heights', category: 'adventure', cost: 3500, durationMinutes: 60 },
+      { name: 'Sunrise yoga session', category: 'sightseeing', cost: 300, durationMinutes: 90 },
+    ],
+  },
+  {
+    name: 'Bangkok',
+    country: 'Thailand',
+    region: 'Southeast Asia',
+    costIndex: 1.0,
+    popularityScore: 96,
+    imageUrl: 'https://images.unsplash.com/photo-1755251042986-91270ffd76f5?w=800&auto=format&fit=crop&q=80',
+    lat: 13.7563,
+    lng: 100.5018,
+    activities: [
+      { name: 'Grand Palace & Wat Phra Kaew', category: 'culture', cost: 600, durationMinutes: 150 },
+      { name: 'Chatuchak weekend market', category: 'sightseeing', cost: 0, durationMinutes: 180 },
+      { name: 'Street food tour in Chinatown', category: 'food', cost: 1200, durationMinutes: 150 },
+      { name: 'Khao San Road nightlife', category: 'nightlife', cost: 1000, durationMinutes: 180 },
+    ],
+  },
+  {
     name: 'Paris',
     country: 'France',
     region: 'Europe',
@@ -110,6 +157,21 @@ const CITIES: Array<{
     ],
   },
   {
+    name: 'Rome',
+    country: 'Italy',
+    region: 'Europe',
+    costIndex: 1.5,
+    popularityScore: 94,
+    imageUrl: 'https://images.unsplash.com/photo-1576507271147-48237d97f182?w=800&auto=format&fit=crop&q=80',
+    lat: 41.9028,
+    lng: 12.4964,
+    activities: [
+      { name: 'Colosseum & Roman Forum tour', category: 'culture', cost: 3200, durationMinutes: 180 },
+      { name: 'Trastevere food walk', category: 'food', cost: 2500, durationMinutes: 150 },
+      { name: 'Vatican Museums & Sistine Chapel', category: 'culture', cost: 2800, durationMinutes: 180 },
+    ],
+  },
+  {
     name: 'Tokyo',
     country: 'Japan',
     region: 'East Asia',
@@ -122,6 +184,36 @@ const CITIES: Array<{
       { name: 'Shibuya Crossing & Harajuku walk', category: 'sightseeing', cost: 0, durationMinutes: 150 },
       { name: 'Tsukiji Outer Market sushi breakfast', category: 'food', cost: 2500, durationMinutes: 90 },
       { name: 'teamLab digital art museum', category: 'culture', cost: 3200, durationMinutes: 120 },
+    ],
+  },
+  {
+    name: 'Singapore',
+    country: 'Singapore',
+    region: 'Southeast Asia',
+    costIndex: 1.55,
+    popularityScore: 91,
+    imageUrl: 'https://images.unsplash.com/photo-1574227492706-f65b24c3688a?w=800&auto=format&fit=crop&q=80',
+    lat: 1.3521,
+    lng: 103.8198,
+    activities: [
+      { name: 'Gardens by the Bay light show', category: 'sightseeing', cost: 0, durationMinutes: 90 },
+      { name: 'Sentosa island day pass', category: 'adventure', cost: 4000, durationMinutes: 360 },
+      { name: 'Hawker centre food crawl', category: 'food', cost: 1500, durationMinutes: 120 },
+    ],
+  },
+  {
+    name: 'London',
+    country: 'United Kingdom',
+    region: 'Europe',
+    costIndex: 1.75,
+    popularityScore: 92,
+    imageUrl: 'https://images.unsplash.com/photo-1758543144598-9d954f44799a?w=800&auto=format&fit=crop&q=80',
+    lat: 51.5072,
+    lng: -0.1276,
+    activities: [
+      { name: 'Tower of London tour', category: 'culture', cost: 3000, durationMinutes: 150 },
+      { name: 'West End musical show', category: 'nightlife', cost: 6000, durationMinutes: 150 },
+      { name: 'Borough Market food tasting', category: 'food', cost: 2000, durationMinutes: 90 },
     ],
   },
   {
@@ -199,6 +291,11 @@ async function main() {
           imageUrl: cityData.imageUrl || null,
         },
       });
+    } else if (!city.imageUrl && cityData.imageUrl) {
+      city = await prisma.city.update({
+        where: { id: city.id },
+        data: { imageUrl: cityData.imageUrl },
+      });
     }
 
     for (const activity of cityData.activities) {
@@ -215,6 +312,11 @@ async function main() {
             durationMinutes: activity.durationMinutes,
             imageUrl: activity.imageUrl || null,
           },
+        });
+      } else if (!existing.imageUrl && activity.imageUrl) {
+        await prisma.activity.update({
+          where: { id: existing.id },
+          data: { imageUrl: activity.imageUrl },
         });
       }
     }
