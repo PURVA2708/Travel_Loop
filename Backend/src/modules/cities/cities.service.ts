@@ -10,6 +10,25 @@ export type CityListQuery = {
   sort?: 'popularity' | 'name' | 'cost' | 'cost_asc' | 'cost_desc';
 };
 
+// Cities store a specific region/state (e.g. "Rajasthan", "Southeast Asia") for
+// display, which doesn't line up with the continent-level filter chips the UI
+// offers (Europe, Asia, North America, Middle East, Oceania). Map by country
+// instead so the filter always matches real data regardless of how granular
+// each city's stored `region` is.
+const COUNTRY_TO_CONTINENT: Record<string, string> = {
+  India: 'Asia',
+  Indonesia: 'Asia',
+  Thailand: 'Asia',
+  Singapore: 'Asia',
+  Japan: 'Asia',
+  UAE: 'Middle East',
+  France: 'Europe',
+  Italy: 'Europe',
+  'United Kingdom': 'Europe',
+  'United States': 'North America',
+  Australia: 'Oceania',
+};
+
 export class CitiesService {
   static async getCities(query: CityQueryInput | any, userId?: string) {
     const { search, region, country, sort, minCost, maxCost, page = 1, limit = 50 } = query;
@@ -25,8 +44,11 @@ export class CitiesService {
       ];
     }
 
-    if (region && region !== 'all') {
-      where.region = { equals: region, mode: 'insensitive' };
+    if (region && region.toLowerCase() !== 'all') {
+      const countriesInContinent = Object.entries(COUNTRY_TO_CONTINENT)
+        .filter(([, continent]) => continent.toLowerCase() === region.toLowerCase())
+        .map(([country]) => country);
+      where.country = { in: countriesInContinent.length > 0 ? countriesInContinent : ['__none__'] };
     }
 
     if (country) {

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BarChart3, Bookmark, Compass, LogOut, PlusCircle, Sparkles, User as UserIcon } from 'lucide-react';
+import { BarChart3, Bookmark, LogOut, PlusCircle, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../common/Button';
+import { LogoMark } from './Logo';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -21,8 +22,8 @@ export const Navbar: React.FC = () => {
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-ink shadow-sm group-hover:scale-105 transition-transform">
-              <Compass className="w-6 h-6 stroke-[2.5]" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+              <LogoMark className="w-6 h-6" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-ink">
               Globe<span className="text-brand-dark">Trotter</span>
@@ -66,15 +67,6 @@ export const Navbar: React.FC = () => {
           >
             <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
             Plan New Trip
-          </Link>
-
-          {/* TripAdvisor-inspired AI Pill */}
-          <Link
-            to="/cities"
-            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-brand text-xs font-bold text-ink hover:bg-brand/10 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-brand-dark fill-brand" />
-            AI Assistant
           </Link>
 
           {isAuthenticated && user ? (

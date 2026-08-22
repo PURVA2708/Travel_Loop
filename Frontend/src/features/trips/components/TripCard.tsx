@@ -12,12 +12,13 @@ const STATUS_STYLES: Record<TripSummary['status'], string> = {
 
 export function TripCard({ trip, onDelete }: { trip: TripSummary; onDelete: (id: string) => void }) {
   const cityCount = new Set(trip.stops.map((s) => s.cityId)).size;
+  const coverImage = trip.coverPhotoUrl || trip.stops[0]?.city?.imageUrl || undefined;
 
   return (
     <Card className="flex flex-col overflow-hidden">
       <div
         className="h-32 w-full bg-gradient-to-br from-brand to-brand-dark bg-cover bg-center"
-        style={trip.coverPhotoUrl ? { backgroundImage: `url(${trip.coverPhotoUrl})` } : undefined}
+        style={coverImage ? { backgroundImage: `url(${coverImage})` } : undefined}
       />
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">

@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { BottomNav } from './BottomNav';
+import { AssistantWidget } from '@/features/assistant/AssistantWidget';
 
 export const AppLayout: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ export const AppLayout: React.FC = () => {
         <Outlet />
       </main>
       <BottomNav />
+      <AssistantWidget />
     </div>
   );
 };

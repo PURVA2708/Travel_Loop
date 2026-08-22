@@ -42,7 +42,7 @@ const CATEGORIES: Array<{
     id: 'SIGHTSEEING',
     label: 'Sightseeing',
     icon: Camera,
-    image: 'https://images.unsplash.com/photo-1543349689-9a4d426bee8e?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=600&auto=format&fit=crop&q=80',
   },
   {
     id: 'FOOD',

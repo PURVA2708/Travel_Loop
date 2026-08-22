@@ -64,7 +64,13 @@ export async function listTrips(userId: string) {
     orderBy: { createdAt: 'desc' },
     include: {
       stops: {
-        select: { id: true, cityId: true },
+        select: {
+          id: true,
+          cityId: true,
+          orderIndex: true,
+          city: { select: { name: true, imageUrl: true } },
+        },
+        orderBy: { orderIndex: 'asc' },
       },
     },
   });

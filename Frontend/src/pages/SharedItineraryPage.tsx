@@ -156,6 +156,7 @@ export const SharedItineraryPage: React.FC<{ slug?: string; onNavigate?: (tab: s
             <img
               src={
                 trip.coverPhotoUrl ||
+                trip.stops[0]?.city?.imageUrl ||
                 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1200&auto=format&fit=crop&q=80'
               }
               alt={trip.name}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Compass, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+import { MapPin, ShieldCheck } from 'lucide-react';
+import { LogoMark } from './Logo';
 
 const HIGHLIGHTS = [
   { icon: MapPin, text: 'Curated activities across 15+ world-class cities' },
@@ -16,8 +17,8 @@ export const AuthLayout: React.FC = () => {
         <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-brand/10 blur-3xl" />
 
         <Link to="/" className="relative flex items-center gap-2.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-ink shadow-sm">
-            <Compass className="h-6 w-6 stroke-[2.5]" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-white shadow-sm">
+            <LogoMark className="h-6 w-6" />
           </div>
           <span className="text-xl font-extrabold tracking-tight">
             Globe<span className="text-brand">Trotter</span>
@@ -25,11 +26,7 @@ export const AuthLayout: React.FC = () => {
         </Link>
 
         <div className="relative max-w-md">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs font-bold text-brand">
-            <Sparkles className="h-3.5 w-3.5" />
-            Next-Gen AI Travel Platform
-          </span>
-          <h1 className="mt-5 font-display text-4xl font-extrabold leading-tight">
+          <h1 className="font-display text-4xl font-extrabold leading-tight">
             Plan trips that feel like they planned themselves.
           </h1>
           <p className="mt-4 text-sm text-surface-white/70">
@@ -55,8 +52,8 @@ export const AuthLayout: React.FC = () => {
       <div className="flex flex-col justify-center px-4 py-12 sm:px-6 lg:px-16">
         <div className="mx-auto w-full max-w-[420px]">
           <Link to="/" className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-ink shadow-sm">
-              <Compass className="h-6 w-6 stroke-[2.5]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-white shadow-sm">
+              <LogoMark className="h-6 w-6" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-ink">
               Globe<span className="text-brand-dark">Trotter</span>
