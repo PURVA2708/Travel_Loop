@@ -5,7 +5,7 @@ import { X, Send, Mic, MicOff, Sparkles, User as UserIcon } from 'lucide-react';
 import { useAssistantStore } from '@/store/assistantStore';
 import { useAuthStore } from '@/store/authStore';
 import { chatWithAssistant, type AssistantChatMessage } from './api';
-import { LogoMark } from '@/components/layout/Logo';
+import { LogoMark, SparkleMark } from '@/components/layout/Logo';
 import { getApiErrorMessage } from '@/lib/api';
 
 type DisplayMessage = AssistantChatMessage & { id: string };
@@ -83,7 +83,7 @@ export function AssistantWidget() {
         aria-label="Open AI assistant"
         className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-white shadow-modal transition-transform hover:scale-105 md:bottom-6 md:right-6"
       >
-        <LogoMark className="h-7 w-7" />
+        <SparkleMark className="h-7 w-7" />
         <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-success ring-2 ring-surface-white">
           <span className="h-1.5 w-1.5 rounded-full bg-white" />
         </span>
