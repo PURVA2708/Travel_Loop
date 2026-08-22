@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { asyncHandler } from '../../lib/asyncHandler.js';
-import { requireAuth } from '../../middleware/auth.middleware.js';
-import { getCityHandler, listCitiesHandler } from './cities.controller.js';
+import { CitiesController, listCitiesHandler, getCityHandler } from './cities.controller';
+import { optionalAuthMiddleware } from '../../middleware/auth.middleware';
 
-/**
- * Scaffolded here only because Trips (Person B) needs a city catalog to
- * build itineraries against. Full ownership (Screen #7 City Search,
- * saved destinations, etc.) belongs to Person A — extend, don't fork.
- */
 export const citiesRouter = Router();
 
-citiesRouter.get('/', requireAuth, asyncHandler(listCitiesHandler));
-citiesRouter.get('/:id', requireAuth, asyncHandler(getCityHandler));
+// Cities routes are public, but use optional auth so we know if user has saved them
+citiesRouter.use(optionalAuthMiddleware);
+
+citiesRouter.get('/', CitiesController.getCities);
+citiesRouter.get('/raw', listCitiesHandler);
+citiesRouter.get('/:id', CitiesController.getCityById);
+citiesRouter.get('/:id/activities', CitiesController.getCityActivities);
+
+export default citiesRouter;

@@ -1,31 +1,46 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api/v1',
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Request interceptor to attach access token
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token =
+      useAuthStore.getState().accessToken ||
+      localStorage.getItem('globetrotter_access_token');
 
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error: AxiosError) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      useAuthStore.getState().logout?.();
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.error ?? fallback;
+    return error.response?.data?.message || error.response?.data?.error || fallback;
   }
   return fallback;
 }
+
+export default api;

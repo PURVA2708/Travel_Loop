@@ -1,72 +1,154 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { loginRequest } from '@/features/auth/api';
-import { getApiErrorMessage } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
+import { useAuthStore } from '../../store/authStore';
+import { api } from '../../lib/api';
 
-/**
- * Minimal scaffold — Screen #1 is Person A's full ownership (forgot
- * password, signup, validation polish). This exists so Trips (Person B)
- * has a real JWT to develop and demo against.
- */
-export function LoginPage() {
-  const navigate = useNavigate();
-  const setSession = useAuthStore((s) => s.setSession);
+export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('demo@globetrotter.app');
   const [password, setPassword] = useState('password123');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const { setAuth } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
     try {
-      const { user, accessToken } = await loginRequest({ email, password });
-      setSession(accessToken, user);
-      navigate('/trips');
-    } catch (err) {
-      setError(getApiErrorMessage(err, 'Login failed'));
+      const res = await api.post('/auth/login', { email, password });
+      const authData = res.data.data || res.data;
+      if (authData) {
+        setAuth(authData);
+        navigate(from, { replace: true });
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  const handleDemoLogin = (role: 'user' | 'admin') => {
+    if (role === 'user') {
+      setEmail('demo@globetrotter.app');
+      setPassword('password123');
+    } else {
+      setEmail('admin@globetrotter.com');
+      setPassword('password123');
+    }
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-[400px] rounded-2xl bg-surface-white p-8 shadow-md">
-        <h1 className="font-display text-2xl font-extrabold text-ink">
-          Globe<span className="text-brand">Trotter</span>
-        </h1>
-        <p className="mt-1 text-sm text-ink/60">Log in to plan your next trip.</p>
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
+      <Card className="w-full max-w-[440px] shadow-modal">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-extrabold text-ink tracking-tight font-display">
+            Globe<span className="text-brand">Trotter</span>
+          </h2>
+          <p className="text-xs text-ink-muted mt-1">
+            Sign in to access your planned trips, multi-city itineraries, and budget tracking
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail className="w-4 h-4" />}
           />
-          {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" isLoading={isLoading} className="mt-2 w-full">
-            Log in
+
+          <div>
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="focus:outline-none hover:text-ink"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
+            <div className="flex justify-end mt-1.5">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium text-ink-muted hover:text-brand-dark transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full mt-2"
+            isLoading={isLoading}
+          >
+            Sign In
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ink/60">
-          New here?{' '}
-          <Link to="/signup" className="font-semibold text-ink underline">
-            Create an account
+        {/* Demo Credentials Helper */}
+        <div className="mt-6 pt-4 border-t border-ink-border/20">
+          <p className="text-[11px] font-semibold text-ink-muted text-center mb-2">
+            ⚡ Quick Demo Logins:
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('user')}
+              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
+            >
+              Demo Traveler
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('admin')}
+              className="py-1.5 px-2 rounded-lg bg-surface border border-ink-border/30 hover:border-brand text-xs font-semibold text-ink transition-colors"
+            >
+              Admin Sarah
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center text-xs text-ink-muted">
+          Don&apos;t have an account?{' '}
+          <Link to="/signup" className="font-bold text-ink hover:text-brand-dark transition-colors">
+            Sign up now
           </Link>
-        </p>
-        <p className="mt-3 rounded-md bg-surface px-3 py-2 text-center text-xs text-ink/50">
-          Demo login is pre-filled — seeded via <code>npm run prisma:seed</code>.
-        </p>
-      </div>
+        </div>
+      </Card>
     </div>
   );
-}
+};
+
+export default LoginPage;

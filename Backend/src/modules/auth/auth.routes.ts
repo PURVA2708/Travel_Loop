@@ -1,13 +1,15 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { asyncHandler } from '../../lib/asyncHandler.js';
-import { requireAuth } from '../../middleware/auth.middleware.js';
-import { loginHandler, meHandler, signupHandler } from './auth.controller.js';
+import { AuthController } from './auth.controller';
+import { validateRequest } from '../../middleware/validate.middleware';
+import { signupSchema, loginSchema, refreshTokenSchema } from './auth.schema';
+import { authMiddleware } from '../../middleware/auth.middleware';
 
 export const authRouter = Router();
 
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20 });
+authRouter.post('/signup', validateRequest(signupSchema), AuthController.signup);
+authRouter.post('/login', validateRequest(loginSchema), AuthController.login);
+authRouter.post('/logout', AuthController.logout);
+authRouter.post('/refresh-token', validateRequest(refreshTokenSchema), AuthController.refreshToken);
+authRouter.get('/me', authMiddleware, AuthController.getMe);
 
-authRouter.post('/signup', authLimiter, asyncHandler(signupHandler));
-authRouter.post('/login', authLimiter, asyncHandler(loginHandler));
-authRouter.get('/me', requireAuth, asyncHandler(meHandler));
+export default authRouter;

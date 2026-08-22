@@ -1,65 +1,130 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { signupRequest } from '@/features/auth/api';
-import { getApiErrorMessage } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
+import { useAuthStore } from '../../store/authStore';
+import { api } from '../../lib/api';
 
-export function SignupPage() {
-  const navigate = useNavigate();
-  const setSession = useAuthStore((s) => s.setSession);
+export const SignupPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const { setAuth } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      const { user, accessToken } = await signupRequest({ name, email, password });
-      setSession(accessToken, user);
-      navigate('/trips');
-    } catch (err) {
-      setError(getApiErrorMessage(err, 'Signup failed'));
+      const res = await api.post('/auth/signup', {
+        name,
+        email,
+        password,
+      });
+      const authData = res.data.data || res.data;
+      if (authData) {
+        setAuth(authData);
+        navigate('/dashboard', { replace: true });
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-[400px] rounded-2xl bg-surface-white p-8 shadow-md">
-        <h1 className="font-display text-2xl font-extrabold text-ink">Create your account</h1>
-        <p className="mt-1 text-sm text-ink/60">Start planning your first GlobeTrotter trip.</p>
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
+      <Card className="w-full max-w-[440px] shadow-modal">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-extrabold text-ink tracking-tight font-display">
+            Create an account
+          </h2>
+          <p className="text-xs text-ink-muted mt-1">
+            Join GlobeTrotter to discover destinations & create smart itineraries
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-2.5 text-danger text-xs font-medium animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Full Name"
+            type="text"
+            placeholder="Maya Lin"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            leftIcon={<User className="w-4 h-4" />}
+          />
+
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="maya@example.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail className="w-4 h-4" />}
+          />
+
           <Input
             label="Password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="At least 6 characters"
+            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
+            leftIcon={<Lock className="w-4 h-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="focus:outline-none hover:text-ink"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            }
           />
-          {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" isLoading={isLoading} className="mt-2 w-full">
-            Sign up
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full mt-2"
+            isLoading={isLoading}
+          >
+            Create Free Account
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ink/60">
+        <div className="mt-6 text-center text-xs text-ink-muted">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-ink underline">
-            Log in
+          <Link to="/login" className="font-bold text-ink hover:text-brand-dark transition-colors">
+            Sign in
           </Link>
-        </p>
-      </div>
+        </div>
+      </Card>
     </div>
   );
-}
+};
+
+export default SignupPage;

@@ -1,4 +1,105 @@
+export type Role = 'user' | 'admin' | 'USER' | 'ADMIN';
+
+export type ActivityCategory =
+  | 'sightseeing'
+  | 'food'
+  | 'adventure'
+  | 'culture'
+  | 'nightlife'
+  | 'SIGHTSEEING'
+  | 'FOOD'
+  | 'ADVENTURE'
+  | 'CULTURE'
+  | 'NIGHTLIFE';
+
 export type ExpenseCategory = 'transport' | 'stay' | 'activities' | 'meals' | 'misc';
+
+export type TripStatus = 'draft' | 'planned' | 'completed' | 'DRAFT' | 'PLANNED' | 'COMPLETED';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  languagePref: string;
+  role: Role;
+  createdAt: string;
+  _count?: {
+    savedDestinations?: number;
+    trips?: number;
+  };
+}
+
+export type PublicUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  avatarUrl: string | null;
+  languagePref: string;
+};
+
+export interface City {
+  id: string;
+  name: string;
+  country: string;
+  region: string | null;
+  description?: string | null;
+  costIndex: number | string;
+  popularityScore: number;
+  imageUrl: string | null;
+  lat: number | string | null;
+  lng: number | string | null;
+  activityCount?: number;
+  isSaved?: boolean;
+  activities?: Activity[];
+}
+
+export interface Activity {
+  id: string;
+  cityId: string;
+  name: string;
+  description: string | null;
+  category: ActivityCategory;
+  cost: number | string;
+  durationMinutes: number;
+  imageUrl: string | null;
+  rating?: number | string;
+  city?: {
+    id: string;
+    name: string;
+    country: string;
+    region?: string | null;
+    costIndex?: number;
+  };
+}
+
+export interface SavedDestinationItem {
+  savedId: string;
+  savedAt: string;
+  city: City;
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  pagination?: Pagination;
+  errors?: Array<{ field: string; message: string }>;
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
 
 export interface TripExpense {
   id: string;
@@ -159,45 +260,6 @@ export interface AdminUser {
     trips: number;
   };
 }
-// Mirrors Backend/prisma/schema.prisma. Prisma serializes Decimal fields
-// as strings over JSON, so cost/budget fields are typed `string` here —
-// convert with Number(...) at the point of use (see money.ts).
-
-export type PublicUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'user' | 'admin';
-  avatarUrl: string | null;
-  languagePref: string;
-};
-
-export type TripStatus = 'draft' | 'planned' | 'completed';
-
-export type City = {
-  id: string;
-  name: string;
-  country: string;
-  region: string | null;
-  costIndex: string;
-  popularityScore: number;
-  imageUrl: string | null;
-  lat: string | null;
-  lng: string | null;
-};
-
-export type ActivityCategory = 'sightseeing' | 'food' | 'adventure' | 'culture' | 'nightlife';
-
-export type Activity = {
-  id: string;
-  cityId: string;
-  name: string;
-  description: string | null;
-  category: ActivityCategory;
-  cost: string;
-  durationMinutes: number;
-  imageUrl: string | null;
-};
 
 export type TripActivity = {
   id: string;
@@ -205,7 +267,7 @@ export type TripActivity = {
   activityId: string;
   scheduledDate: string;
   scheduledTime: string | null;
-  actualCost: string;
+  actualCost: string | number;
   orderIndex: number;
   activity: Activity;
 };
@@ -229,7 +291,7 @@ export type Trip = {
   startDate: string;
   endDate: string;
   coverPhotoUrl: string | null;
-  totalBudget: string;
+  totalBudget: string | number;
   status: TripStatus;
   createdAt: string;
   stops: TripStop[];

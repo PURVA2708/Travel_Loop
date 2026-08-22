@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { asyncHandler } from '../../lib/asyncHandler.js';
-import { requireAuth } from '../../middleware/auth.middleware.js';
-import { getActivityHandler, listActivitiesHandler } from './activities.controller.js';
+import { ActivitiesController, listActivitiesHandler, getActivityHandler } from './activities.controller';
+import { optionalAuthMiddleware } from '../../middleware/auth.middleware';
 
-/** Scaffolded for Trips (Person B); full ownership is Person A's (Screen #8). */
 export const activitiesRouter = Router();
 
-activitiesRouter.get('/', requireAuth, asyncHandler(listActivitiesHandler));
-activitiesRouter.get('/:id', requireAuth, asyncHandler(getActivityHandler));
+activitiesRouter.get('/', optionalAuthMiddleware, ActivitiesController.getActivities);
+activitiesRouter.get('/raw', optionalAuthMiddleware, listActivitiesHandler);
+activitiesRouter.get('/:id', optionalAuthMiddleware, ActivitiesController.getActivityById);
+
+export default activitiesRouter;

@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 enum Role {
@@ -40,38 +40,38 @@ enum CollaboratorPermission {
 }
 
 model User {
-  id               String               @id @default(uuid())
-  name             String
-  email            String               @unique
-  passwordHash     String               @map("password_hash")
-  avatarUrl        String?              @map("avatar_url")
-  languagePref     String               @default("en") @map("language_pref")
-  role             Role                 @default(user)
-  createdAt        DateTime             @default(now()) @map("created_at")
-  trips            Trip[]
-  collaborations   TripCollaborator[]
+  id                String               @id @default(uuid())
+  name              String
+  email             String               @unique
+  passwordHash      String               @map("password_hash")
+  avatarUrl         String?              @map("avatar_url")
+  languagePref      String               @default("en") @map("language_pref")
+  role              Role                 @default(user)
+  createdAt         DateTime             @default(now()) @map("created_at")
+  trips             Trip[]
+  collaborations    TripCollaborator[]
   savedDestinations SavedDestination[]
 
   @@map("users")
 }
 
 model Trip {
-  id             String             @id @default(uuid())
-  userId         String             @map("user_id")
-  name           String
-  description    String?
-  startDate      DateTime           @map("start_date")
-  endDate        DateTime           @map("end_date")
-  coverPhotoUrl  String?            @map("cover_photo_url")
-  totalBudget    Decimal            @default(0.0) @map("total_budget") @db.Decimal(10, 2)
-  status         TripStatus         @default(draft)
-  createdAt      DateTime           @default(now()) @map("created_at")
+  id            String             @id @default(uuid())
+  userId        String             @map("user_id")
+  name          String
+  description   String?
+  startDate     DateTime           @map("start_date")
+  endDate       DateTime           @map("end_date")
+  coverPhotoUrl String?            @map("cover_photo_url")
+  totalBudget   Decimal            @default(0.0) @map("total_budget") @db.Decimal(10, 2)
+  status        TripStatus         @default(draft)
+  createdAt     DateTime           @default(now()) @map("created_at")
 
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stops          TripStop[]
-  expenses       TripExpense[]      // Person C Owned
-  shareLink      ShareLink?         // Person C Owned
-  collaborators  TripCollaborator[] // Person C Owned
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops         TripStop[]
+  expenses      TripExpense[]
+  shareLink     ShareLink?
+  collaborators TripCollaborator[]
 
   @@index([userId])
   @@map("trips")
@@ -96,16 +96,16 @@ model City {
 }
 
 model Activity {
-  id              String            @id @default(uuid())
-  cityId          String            @map("city_id")
+  id              String           @id @default(uuid())
+  cityId          String           @map("city_id")
   name            String
   description     String?
   category        ActivityCategory
-  cost            Decimal           @default(0.0) @db.Decimal(10, 2)
-  durationMinutes Int               @default(60) @map("duration_minutes")
-  imageUrl        String?           @map("image_url")
+  cost            Decimal          @default(0.0) @db.Decimal(10, 2)
+  durationMinutes Int              @default(60) @map("duration_minutes")
+  imageUrl        String?          @map("image_url")
 
-  city            City              @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  city            City             @relation(fields: [cityId], references: [id], onDelete: Cascade)
   tripActivities  TripActivity[]
 
   @@map("activities")
@@ -142,10 +142,6 @@ model TripActivity {
   @@index([tripStopId])
   @@map("trip_activities")
 }
-
-// -------------------------------------------------------------
-// Person C: Tables Owned
-// -------------------------------------------------------------
 
 model TripExpense {
   id        String          @id @default(uuid())

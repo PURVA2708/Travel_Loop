@@ -1,42 +1,87 @@
-import type { NextFunction, Request, Response } from 'express';
-import { ApiError } from '../lib/ApiError.js';
-import { verifyAccessToken } from '../lib/jwt.js';
+import { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken, TokenPayload } from '../utils/jwt';
+
+export interface AuthenticatedRequest extends Request {
+  user?: TokenPayload;
+  userId?: string;
+  userRole?: 'user' | 'admin' | string;
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
+      user?: TokenPayload;
       userId?: string;
-      userRole?: 'user' | 'admin';
+      userRole?: 'user' | 'admin' | string;
     }
   }
 }
 
-/**
- * Minimal JWT bearer-token guard shared by every module's routes.
- * Owned jointly (built in Phase 0) — Person A's `auth` module is the
- * source of truth for issuing these tokens (signup/login/refresh).
- */
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
-    throw ApiError.unauthorized('Missing bearer token');
-  }
-
-  const token = header.slice('Bearer '.length);
+export const authMiddleware = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
   try {
-    const payload = verifyAccessToken(token);
-    req.userId = payload.sub;
-    req.userRole = payload.role;
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required. No token provided.',
+      });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = verifyAccessToken(token);
+    req.user = decoded;
+    req.userId = decoded.userId || (decoded as any).sub;
+    req.userRole = decoded.role?.toLowerCase();
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: 'Invalid or expired token.',
+    });
+  }
+};
+
+export const requireAuth = authMiddleware;
+
+export const optionalAuthMiddleware = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = verifyAccessToken(token);
+      req.user = decoded;
+      req.userId = decoded.userId || (decoded as any).sub;
+      req.userRole = decoded.role?.toLowerCase();
+    }
     next();
   } catch {
-    throw ApiError.unauthorized('Invalid or expired token');
+    // If token invalid, proceed as guest without error
+    next();
   }
-}
+};
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (req.userRole !== 'admin') {
-    throw ApiError.forbidden('Admin access required');
+export const requireAdmin = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  const role = req.user?.role?.toLowerCase() || req.userRole?.toLowerCase();
+  if (role !== 'admin') {
+    res.status(403).json({
+      success: false,
+      message: 'Forbidden. Admin privileges required.',
+    });
+    return;
   }
   next();
-}
+};

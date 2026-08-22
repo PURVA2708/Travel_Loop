@@ -1,15 +1,13 @@
 # Dependencies
 node_modules/
+dist/
+build/
+.vite/
 
 # Env files (never commit secrets)
 .env
 .env.local
 .env.*.local
-
-# Build output
-dist/
-build/
-.vite/
 
 # Prisma
 Backend/prisma/dev.db
@@ -17,6 +15,7 @@ Backend/prisma/migrations/dev/
 
 # Logs
 npm-debug.log*
+yarn-debug.log*
 *.log
 
 # Editor / OS

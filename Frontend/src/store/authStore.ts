@@ -1,22 +1,64 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { PublicUser } from '@/types';
+import { User, PublicUser, AuthResponse } from '../types';
 
-type AuthState = {
+interface AuthState {
+  user: User | PublicUser | null;
   accessToken: string | null;
-  user: PublicUser | null;
-  setSession: (accessToken: string, user: PublicUser) => void;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  setAuth: (data: AuthResponse) => void;
+  setSession: (accessToken: string, user: PublicUser | User) => void;
+  setUser: (user: User | PublicUser) => void;
   logout: () => void;
-};
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      accessToken: null,
       user: null,
-      setSession: (accessToken, user) => set({ accessToken, user }),
-      logout: () => set({ accessToken: null, user: null }),
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+
+      setAuth: (data: AuthResponse) => {
+        localStorage.setItem('globetrotter_access_token', data.accessToken);
+        localStorage.setItem('globetrotter_refresh_token', data.refreshToken);
+        set({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          isAuthenticated: true,
+        });
+      },
+
+      setSession: (accessToken: string, user: PublicUser | User) => {
+        localStorage.setItem('globetrotter_access_token', accessToken);
+        set({
+          user,
+          accessToken,
+          isAuthenticated: true,
+        });
+      },
+
+      setUser: (user: User | PublicUser) => {
+        set({ user });
+      },
+
+      logout: () => {
+        localStorage.removeItem('globetrotter_access_token');
+        localStorage.removeItem('globetrotter_refresh_token');
+        localStorage.removeItem('globetrotter_user');
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+        });
+      },
     }),
-    { name: 'globetrotter-auth' },
-  ),
+    {
+      name: 'globetrotter-auth',
+    }
+  )
 );

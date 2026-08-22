@@ -1,62 +1,153 @@
 import bcrypt from 'bcryptjs';
-import { prisma } from '../../lib/prisma.js';
-import { ApiError } from '../../lib/ApiError.js';
-import { signAccessToken, signRefreshToken } from '../../lib/jwt.js';
-import type { LoginInput, SignupInput } from './auth.schema.js';
+import { prisma } from '../../lib/prisma';
+import { hashPassword, comparePassword } from '../../utils/password';
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt';
+import { AppError } from '../../middleware/error.middleware';
+import { SignupInput, LoginInput } from './auth.schema';
 
-const SALT_ROUNDS = 10;
+export class AuthService {
+  static async signup(input: SignupInput) {
+    const existing = await prisma.user.findUnique({
+      where: { email: input.email.toLowerCase() },
+    });
 
-function toPublicUser(user: { id: string; name: string; email: string; role: 'user' | 'admin'; avatarUrl: string | null; languagePref: string }) {
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    avatarUrl: user.avatarUrl,
-    languagePref: user.languagePref,
-  };
-}
+    if (existing) {
+      throw new AppError('A user with this email already exists', 400);
+    }
 
-function issueTokens(user: { id: string; role: 'user' | 'admin' }) {
-  const payload = { sub: user.id, role: user.role };
-  return {
-    accessToken: signAccessToken(payload),
-    refreshToken: signRefreshToken(payload),
-  };
-}
+    const passwordHash = await hashPassword(input.password);
 
-export async function signup(input: SignupInput) {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
-  if (existing) {
-    throw ApiError.conflict('An account with this email already exists');
+    const user = await prisma.user.create({
+      data: {
+        name: input.name,
+        email: input.email.toLowerCase(),
+        passwordHash,
+        avatarUrl: input.avatarUrl || null,
+        languagePref: input.languagePref || 'en',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+        languagePref: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    const tokenPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = signAccessToken(tokenPayload);
+    const refreshToken = signRefreshToken(tokenPayload);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
   }
 
-  const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
-  const user = await prisma.user.create({
-    data: { name: input.name, email: input.email, passwordHash },
-  });
+  static async login(input: LoginInput) {
+    const user = await prisma.user.findUnique({
+      where: { email: input.email.toLowerCase() },
+    });
 
-  return { user: toPublicUser(user), ...issueTokens(user) };
-}
+    if (!user) {
+      throw new AppError('Invalid email or password', 401);
+    }
 
-export async function login(input: LoginInput) {
-  const user = await prisma.user.findUnique({ where: { email: input.email } });
-  if (!user) {
-    throw ApiError.unauthorized('Invalid email or password');
+    const isValidPassword = await comparePassword(input.password, user.passwordHash);
+    if (!isValidPassword) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    const tokenPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = signAccessToken(tokenPayload);
+    const refreshToken = signRefreshToken(tokenPayload);
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        languagePref: user.languagePref,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+      accessToken,
+      refreshToken,
+    };
   }
 
-  const passwordMatches = await bcrypt.compare(input.password, user.passwordHash);
-  if (!passwordMatches) {
-    throw ApiError.unauthorized('Invalid email or password');
+  static async refreshToken(refreshTokenString: string) {
+    try {
+      const decoded = verifyRefreshToken(refreshTokenString);
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+      });
+
+      if (!user) {
+        throw new AppError('User no longer exists', 401);
+      }
+
+      const tokenPayload = {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      };
+
+      const newAccessToken = signAccessToken(tokenPayload);
+      const newRefreshToken = signRefreshToken(tokenPayload);
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch {
+      throw new AppError('Invalid or expired refresh token', 401);
+    }
   }
 
-  return { user: toPublicUser(user), ...issueTokens(user) };
+  static async getMe(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+        languagePref: true,
+        role: true,
+        createdAt: true,
+        _count: {
+          select: {
+            savedDestinations: true,
+            trips: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    return user;
+  }
 }
 
-export async function getMe(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
-    throw ApiError.notFound('User not found');
-  }
-  return toPublicUser(user);
-}
+export const signup = AuthService.signup;
+export const login = AuthService.login;
+export const getMe = AuthService.getMe;
